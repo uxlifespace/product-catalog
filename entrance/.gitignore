@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Env & secrets — NEVER commit the KeyCRM API key
+.env
+.env.local
+.env*.local
+
+# Build / hosting
+.vercel
+.netlify
+dist/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
