@@ -11,7 +11,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Marcel&amp;Co — Сторінка Entrance</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />h
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
@@ -492,7 +492,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }
     });
 
-    document.querySelector('.phone-row').addEventListener('submit', function (e) {
+    document.querySelector('.phone-row').addEventListener('submit', async function (e) {
       e.preventDefault();
       if (rest(input.value).length < 9) {
         input.focus();
@@ -500,7 +500,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         return;
       }
       input.style.borderColor = '';
-      // Hook up real submission here.
+      // Send to KeyCRM
+      const btn = e.target.querySelector('.btn-send');
+      btn.disabled = true;
+      const note = document.querySelector('#phone-note');
+      try {
+        const resp = await fetch('/api/lead', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: rest(input.value) })
+        });
+        if (resp.ok) {
+          note.textContent = 'Dyakuyemo! Peredzvolymo za 30 khv.';
+          note.style.color = 'var(--main-primary)';
+          input.value = PREFIX;
+          input.disabled = true;
+        } else {
+          note.textContent = 'Pomylka. Sprobuite shche raz.';
+          note.style.color = '#e0664a';
+          btn.disabled = false;
+        }
+      } catch (err) {
+        note.textContent = 'Pomylka merezhi. Sprobuite shche raz.';
+        note.style.color = '#e0664a';
+        btn.disabled = false;
+      }
     });
   })();
 </script>
