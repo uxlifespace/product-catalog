@@ -11,7 +11,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Marcel&amp;Co — Сторінка Entrance</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />h
+<link rel="preconnect" href="https://fonts.googleapis.com" />hh
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
@@ -511,17 +511,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           body: JSON.stringify({ phone: rest(input.value) })
         });
         if (resp.ok) {
-          note.textContent = 'Dyakuyemo! Peredzvolymo za 30 khv.';
+          note.textContent = 'Дякуємо! Передзвонимо за 30 хв.';
           note.style.color = 'var(--main-primary)';
           input.value = PREFIX;
           input.disabled = true;
         } else {
-          note.textContent = 'Pomylka. Sprobuite shche raz.';
+          note.textContent = 'Помилка. Спробуйте ще раз.';
           note.style.color = '#e0664a';
           btn.disabled = false;
         }
       } catch (err) {
-        note.textContent = 'Pomylka merezhi. Sprobuite shche raz.';
+        note.textContent = 'Помилка мережі. Спробуйте ще раз.';
         note.style.color = '#e0664a';
         btn.disabled = false;
       }
