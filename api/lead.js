@@ -13,7 +13,7 @@ export default async function handler(req, res) {
                 },
                 body: JSON.stringify({
                           full_name: 'Заявка з лендінгу',
-                          phone,
+                          phone: [phone],
                 }),
         });
         const data = await r.json();
