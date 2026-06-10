@@ -505,7 +505,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       btn.disabled = true;
       const note = document.querySelector('#phone-note');
       try {
-        const resp = await fetch('/api/lead', {
+        const resp = await fetch('/entrance/api/lead', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ phone: rest(input.value) })
