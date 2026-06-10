@@ -5,7 +5,7 @@ export default async function handler(req, res) {
     if (!phone) return res.status(400).json({ error: 'phone is required' });
 
   try {
-        const r = await fetch('https://openapi.keycrm.app/v1/buyers', {
+        const r = await fetch('https://openapi.keycrm.app/v1/buyer', {
                 method: 'POST',
                 headers: {
                           Authorization: `Bearer ${process.env.KEYCRM_API_KEY}`,
