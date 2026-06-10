@@ -22,7 +22,11 @@ export default async function handler(req, res) {
     const orderRes = await fetch('https://openapi.keycrm.app/v1/order', {
       method: 'POST',
       headers,
-      body: JSON.stringify({ buyer_id: buyer.id, buyer_comment: 'Телефон: ' + phone, status_id: 1 }),
+      body: JSON.stringify({
+        source_name: 'Лендінг',
+        buyer: { id: buyer.id },
+        buyer_comment: 'Телефон: ' + phone,
+      }),
     });
     const order = await orderRes.json();
     console.log('Order:', orderRes.status, JSON.stringify(order));
