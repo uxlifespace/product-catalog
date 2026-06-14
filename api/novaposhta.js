@@ -1,7 +1,7 @@
 const NP_API = 'https://api.novaposhta.ua/v2.0/json/';
 const NP_KEY = process.env.NOVAPOSHTA_API_KEY || '';
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const { action, query, cityRef } = req.body || {};
