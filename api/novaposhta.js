@@ -37,7 +37,7 @@ export default async function handler(req, res) {
         methodProperties: {
           CityRef: cityRef || '',
           FindByString: query || '',
-          Limit: 20,
+          Limit:50,
           Page: 1,
           Language: 'UA',
         },
