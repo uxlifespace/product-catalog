@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Marcel&amp;Co — Оформлення замовлення</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --main:#9C4A2D;--main2:#FFCFA8;--hover:#B33A0B;
+  --green:#3F4818;--green2:#D3CA9F;
+  --page:#DCEBE7;
+  --disp:"SF Pro Display",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+  --body:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{background:var(--page);font-family:var(--body);color:var(--main);-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}button{font-family:inherit;cursor:pointer}a{color:inherit;text-decoration:none}
+
+/* CONTAINER */
+.wrap{max-width:1840px;margin:0 auto;padding:0 40px}
+
+/* HEADER */
+.hdr{height:80px;display:flex;align-items:center;position:sticky;top:0;z-index:50;background:var(--page);border-bottom:1px solid rgba(0,0,0,.06)}
+.hdr__in{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;width:100%}
+.hdr__back{justify-self:start;display:inline-flex;align-items:center;gap:6px;font-size:15px;font-weight:500;color:var(--main);opacity:.7;transition:opacity .2s}
+.hdr__back:hover{opacity:1}
+.hdr__back svg{width:18px;height:18px;flex-shrink:0}
+.logo{justify-self:center;display:flex;align-items:center}
+.logo img{height:58px;width:auto;display:block}
+.hdr__spacer{justify-self:end}
+
+/* PAGE TITLE */
+.page-title{font-family:var(--disp);font-size:40px;font-weight:400;color:var(--green);margin:40px 0 32px;letter-spacing:-.5px;line-height:1.1}
+
+/* LAYOUT */
+.co{display:grid;grid-template-columns:1fr 420px;gap:40px;padding-bottom:80px;align-items:start}
+
+/* SECTIONS */
+.sec{background:#fff;border-radius:20px;padding:28px 32px;margin-bottom:20px}
+.sec__h{font-family:var(--disp);font-size:22px;font-weight:500;color:var(--green);margin:0 0 20px;letter-spacing:-.3px}
+.sec__h .opt-tag{font-family:var(--body);font-size:12px;font-weight:400;color:var(--main);opacity:.45;letter-spacing:0;margin-left:6px}
+
+/* ORDER ITEMS */
+.oi__item{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid rgba(0,0,0,.06)}
+.oi__item:last-child{border-bottom:none}
+.oi__img{width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0;background:var(--green2)}
+.oi__info{flex:1;min-width:0}
+.oi__name{font-size:14px;font-weight:600;color:var(--green);margin:0 0 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.oi__sub{font-size:12px;color:var(--main);opacity:.6}
+.oi__price{font-size:14px;font-weight:600;color:var(--green);white-space:nowrap}
+.oi__empty{text-align:center;padding:20px 0;color:var(--main);opacity:.5;font-size:14px;margin:0}
+
+/* FORM */
+.field{margin-bottom:16px}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--green);margin-bottom:6px}
+.field label .opt{font-weight:400;opacity:.5;font-size:12px;margin-left:4px}
+.field input,.field textarea{width:100%;padding:12px 16px;border:1.5px solid rgba(63,72,24,.2);border-radius:12px;font-family:var(--body);font-size:15px;color:var(--green);background:#fff;transition:border-color .2s,box-shadow .2s;outline:none;-webkit-appearance:none}
+.field input:focus,.field textarea:focus{border-color:var(--main);box-shadow:0 0 0 3px rgba(156,74,45,.1)}
+.field input.err{border-color:#c0392b}
+.field .err-msg{font-size:12px;color:#c0392b;margin-top:4px;display:none}
+.field input.err ~ .err-msg{display:block}
+.field textarea{resize:vertical;min-height:80px}
+.field input::placeholder,.field textarea::placeholder{color:var(--green);opacity:.35}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+/* DELIVERY TABS — segmented control */
+.dtabs{display:flex;background:rgba(63,72,24,.08);border-radius:14px;padding:4px;gap:4px;margin-bottom:20px}
+.dtab{flex:1;position:relative;display:flex;align-items:center;justify-content:center;padding:11px 16px;border:none;border-radius:10px;cursor:pointer;font-size:14px;font-weight:500;color:rgba(63,72,24,.55);background:transparent;transition:all .2s;font-family:var(--body);-webkit-user-select:none;user-select:none}.dtab-logo{position:absolute;right:10px;top:50%;transform:translateY(-50%);display:flex;align-items:center;pointer-events:none}
+.dtab.active{background:#fff;color:var(--green);box-shadow:0 1px 4px rgba(0,0,0,.1),0 0 0 0.5px rgba(0,0,0,.04)}
+.dtab svg{flex-shrink:0}
+
+/* AUTOCOMPLETE */
+.ac-wrap{position:relative}
+.ac-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1.5px solid rgba(63,72,24,.2);border-radius:12px;z-index:200;max-height:220px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.12);display:none}
+.ac-list.open{display:block}
+.ac-item{padding:10px 16px;cursor:pointer;font-size:14px;color:var(--green);transition:background .12s;line-height:1.4}
+.ac-item:hover,.ac-item:focus{background:rgba(156,74,45,.07);outline:none}
+.ac-item strong{color:var(--main)}
+.ac-hint{padding:10px 16px;font-size:13px;color:var(--green);opacity:.45}
+
+/* PAYMENT */
+.pay-methods{display:flex;flex-direction:column;gap:10px}
+.pay-method{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1.5px solid rgba(63,72,24,.2);border-radius:14px;cursor:pointer;transition:all .2s;background:#fff;-webkit-user-select:none;user-select:none}
+.pay-method.active{border-color:var(--main);background:rgba(156,74,45,.04)}
+.pay-method input[type=radio]{display:none}
+.pay-radio{width:20px;height:20px;border-radius:50%;border:2px solid rgba(63,72,24,.3);flex-shrink:0;position:relative;transition:border-color .2s}
+.pay-method.active .pay-radio{border-color:var(--main)}
+.pay-radio:after{content:'';position:absolute;inset:3px;border-radius:50%;background:var(--main);opacity:0;transition:opacity .15s}
+.pay-method.active .pay-radio:after{opacity:1}
+.pay-info{flex:1}
+.pay-name{font-size:14px;font-weight:600;color:var(--green)}
+.pay-desc{font-size:12px;color:var(--green);opacity:.5;margin-top:2px}
+.pay-logos{display:flex;gap:5px;align-items:center;flex-shrink:0}
+
+/* SIDEBAR */
+.sidebar{position:sticky;top:100px}
+.summary{background:#fff;border-radius:20px;padding:28px 32px}
+.summary__title{font-family:var(--disp);font-size:22px;font-weight:500;color:var(--green);margin:0 0 16px;letter-spacing:-.3px}
+.summary__divider{border:none;border-top:1px solid rgba(0,0,0,.07);margin:16px 0}
+.sum-row{display:flex;justify-content:space-between;font-size:14px;color:var(--green);padding:4px 0}
+.sum-row.total{padding-top:14px;font-size:18px;font-weight:700}
+.sum-note{font-size:12px;color:var(--green);opacity:.45;margin:10px 0 0;line-height:1.5}
+
+/* CTA */
+.btn-checkout{display:block;width:100%;padding:18px;margin-top:20px;background:var(--main);color:#fff;border:none;border-radius:100px;font-size:17px;font-weight:600;text-align:center;cursor:pointer;transition:background .2s,transform .1s;position:relative;overflow:hidden}
+.btn-checkout:hover{background:var(--hover)}
+.btn-checkout:active{transform:scale(.98)}
+.btn-checkout:disabled{background:rgba(156,74,45,.35);cursor:not-allowed;transform:none}
+.btn-text{transition:opacity .2s}
+.btn-checkout.loading .btn-text{opacity:0}
+.btn-spinner{display:none;position:absolute;inset:0;margin:auto;width:22px;height:22px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+.btn-checkout.loading .btn-spinner{display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.legal{font-size:11px;color:var(--green);opacity:.4;text-align:center;margin-top:12px;line-height:1.5}
+.submit-error{color:#c0392b;font-size:13px;margin-top:10px;text-align:center;display:none;line-height:1.4}
+.submit-error.show{display:block}
+
+/* SUCCESS */
+.success-wrap{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 40px;text-align:center}
+.success-icon{font-size:72px;margin-bottom:20px;line-height:1}
+.success-title{font-family:var(--disp);font-size:40px;font-weight:500;color:var(--green);margin:0 0 14px}
+.success-sub{font-size:16px;color:var(--green);opacity:.6;margin:0 0 36px;line-height:1.6;max-width:460px}
+.btn-back{display:inline-block;padding:16px 40px;background:var(--main);color:#fff;border-radius:100px;font-size:16px;font-weight:600;cursor:pointer;border:none;text-decoration:none;transition:background .2s}
+.btn-back:hover{background:var(--hover)}
+
+/* RESPONSIVE */
+@media(max-width:1280px){
+  .co{grid-template-columns:1fr 380px;gap:32px}
+}
+@media(max-width:1024px){
+  .co{grid-template-columns:1fr;gap:0}
+  .sidebar{position:static;margin-top:20px}
+  .page-title{font-size:32px;margin:28px 0 24px}
+}
+@media(max-width:768px){
+  .wrap{padding:0 20px}
+  .row2{grid-template-columns:1fr}
+  .sec{padding:20px}
+  .summary{padding:20px}
+  .page-title{font-size:26px;margin:20px 0 20px}
+  .hdr__back span{display:none}
+}
+@media(max-width:480px){
+  .wrap{padding:0 16px}
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr__in wrap">
+    <a href="/" class="hdr__back">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      <span>До каталогу</span>
+    </a>
+    <a href="/" class="logo"><img src="Vector-logo.svg" alt="Marcel&Co" /></a>
+    <div class="hdr__spacer"></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 class="page-title">Оформлення замовлення</h1>
+
+  <div class="co" id="coLayout">
+
+    <!-- LEFT COLUMN -->
+    <div id="leftCol">
+
+      <!-- 1. DELIVERY -->
+      <div class="sec">
+        <h2 class="sec__h">Доставка</h2>
+
+        <!-- Segmented tabs with company icons -->
+        <div class="dtabs">
+          <button class="dtab active" onclick="setDelivery('np',this)">
+            Нова Пошта
+            <span class="dtab-logo"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+CjwhLS0gQ3JlYXRlZCB3aXRoIElua3NjYXBlIChodHRwOi8vd3d3Lmlua3NjYXBlLm9yZy8pIC0tPgoKPHN2ZwogICB4bWxuczpkYz0iaHR0cDovL3B1cmwub3JnL2RjL2VsZW1lbnRzLzEuMS8iCiAgIHhtbG5zOmNjPSJodHRwOi8vY3JlYXRpdmVjb21tb25zLm9yZy9ucyMiCiAgIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyIKICAgeG1sbnM6c3ZnPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIKICAgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIgogICB4bWxuczpzb2RpcG9kaT0iaHR0cDovL3NvZGlwb2RpLnNvdXJjZWZvcmdlLm5ldC9EVEQvc29kaXBvZGktMC5kdGQiCiAgIHhtbG5zOmlua3NjYXBlPSJodHRwOi8vd3d3Lmlua3NjYXBlLm9yZy9uYW1lc3BhY2VzL2lua3NjYXBlIgogICB3aWR0aD0iMjEwIgogICBoZWlnaHQ9Ijc1IgogICBpZD0ic3ZnNDE1NCIKICAgdmVyc2lvbj0iMS4xIgogICBpbmtzY2FwZTp2ZXJzaW9uPSIwLjQ4LjQgcjk5MzkiCiAgIHNvZGlwb2RpOmRvY25hbWU9Ik5ldyBkb2N1bWVudCA0Ij4KICA8ZGVmcwogICAgIGlkPSJkZWZzNDE1NiIgLz4KICA8c29kaXBvZGk6bmFtZWR2aWV3CiAgICAgaWQ9ImJhc2UiCiAgICAgcGFnZWNvbG9yPSIjZmZmZmZmIgogICAgIGJvcmRlcmNvbG9yPSIjZmZmZmZmIgogICAgIGJvcmRlcm9wYWNpdHk9IjAuMCIKICAgICBpbmtzY2FwZTpwYWdlb3BhY2l0eT0iMC4wIgogICAgIGlua3NjYXBlOnBhZ2VzaGFkb3c9IjAiCiAgICAgaW5rc2NhcGU6em9vbT0iMi44IgogICAgIGlua3NjYXBlOmN4PSIxNDMuNDQ3ODciCiAgICAgaW5rc2NhcGU6Y3k9IjQyLjg1MzA5MyIKICAgICBpbmtzY2FwZTpkb2N1bWVudC11bml0cz0icHgiCiAgICAgaW5rc2NhcGU6Y3VycmVudC1sYXllcj0ibGF5ZXIxIgogICAgIHNob3dncmlkPSJmYWxzZSIKICAgICBmaXQtbWFyZ2luLXRvcD0iMCIKICAgICBmaXQtbWFyZ2luLWxlZnQ9IjAiCiAgICAgZml0LW1hcmdpbi1yaWdodD0iMCIKICAgICBmaXQtbWFyZ2luLWJvdHRvbT0iMCIKICAgICBpbmtzY2FwZTp3aW5kb3ctd2lkdGg9IjEzNjYiCiAgICAgaW5rc2NhcGU6d2luZG93LWhlaWdodD0iNzQ2IgogICAgIGlua3NjYXBlOndpbmRvdy14PSItOCIKICAgICBpbmtzY2FwZTp3aW5kb3cteT0iLTgiCiAgICAgaW5rc2NhcGU6d2luZG93LW1heGltaXplZD0iMSIgLz4KICA8bWV0YWRhdGEKICAgICBpZD0ibWV0YWRhdGE0MTU5Ij4KICAgIDxyZGY6UkRGPgogICAgICA8Y2M6V29yawogICAgICAgICByZGY6YWJvdXQ9IiI+CiAgICAgICAgPGRjOmZvcm1hdD5pbWFnZS9zdmcreG1sPC9kYzpmb3JtYXQ+CiAgICAgICAgPGRjOnR5cGUKICAgICAgICAgICByZGY6cmVzb3VyY2U9Imh0dHA6Ly9wdXJsLm9yZy9kYy9kY21pdHlwZS9TdGlsbEltYWdlIiAvPgogICAgICAgIDxkYzp0aXRsZT48L2RjOnRpdGxlPgogICAgICA8L2NjOldvcms+CiAgICA8L3JkZjpSREY+CiAgPC9tZXRhZGF0YT4KICA8ZwogICAgIGlua3NjYXBlOmxhYmVsPSJMYXllciAxIgogICAgIGlua3NjYXBlOmdyb3VwbW9kZT0ibGF5ZXIiCiAgICAgaWQ9ImxheWVyMSIKICAgICB0cmFuc2Zvcm09InRyYW5zbGF0ZSg0LjI2MjAwOGUtNywtOTc3LjM2MjE3KSI+CiAgICA8ZwogICAgICAgaWQ9Imc0MjAzIgogICAgICAgdHJhbnNmb3JtPSJtYXRyaXgoMC45NjgxMDQ0MywwLDAsMC45NjM4NTU0NSw3Ny4zMzk4NzQsMTA3NC41NDc1KSI+CiAgICAgIDxwYXRoCiAgICAgICAgIGlkPSJwYXRoMzQzMyIKICAgICAgICAgc3R5bGU9ImZpbGw6I2VkMWMyNDtmaWxsLW9wYWNpdHk6MTtmaWxsLXJ1bGU6ZXZlbm9kZDtzdHJva2U6bm9uZSIKICAgICAgICAgZD0ibSAxNS4wNjgzMDQsLTg3LjYyOTc4MiBjIDAsMCAwLDAgNC41NjI1LDAgMS42NjI1LDAgMi41LDAuODI1IDIuNSwyLjY4NzUgMCwwIDAsMCAwLDYuNiAwLDAgMCwwIDguOTM3NSwwIDAsMCAwLDAgMCwtNi42IDAsLTEuODYyNSAwLjgyNSwtMi42ODc1IDIuNywtMi42ODc1IDAsMCAwLDAgNC4zNjI1LDAgMCwwIDAsMCAwLDQuMzM3NSAwLDAgMCwwIC0xLjg2MjUsMCAwLDAgLTAuMjEyNSwwLjIxMjUgLTAuMjEyNSwwLjIxMjUgMCwwIDAsMCAwLDE4LjU3NSAwLDAgMCwwIC00Ljk4NzUsMCAwLDAgMCwwIDAsLTkuMjg3NSAwLDAgMCwwIC04LjkzNzUsMCAwLDAgMCwwIDAsOS4yODc1IDAsMCAwLDAgLTQuOTg3NSwwIDAsMCAwLDAgMCwtMTguNTc1IDAsMCAwLC0wLjIxMjUgLTAuMjEyNSwtMC4yMTI1IDAsMCAwLDAgLTEuODYyNSwwIDAsMCAwLDAgMCwtNC4zMzc1IHoiCiAgICAgICAgIGlua3NjYXBlOmNvbm5lY3Rvci1jdXJ2YXR1cmU9IjAiIC8+CiAgICAgIDxwYXRoCiAgICAgICAgIGlkPSJwYXRoMzQzNSIKICAgICAgICAgc3R5bGU9ImZpbGw6I2VkMWMyNDtmaWxsLW9wYWNpdHk6MTtmaWxsLXJ1bGU6ZXZlbm9kZDtzdHJva2U6bm9uZSIKICAgICAgICAgZD0ibSA1MS4yMTgzMDQsLTg4LjA0MjI4MiAwLjExMjUsMC4wMTI1IDAsNC43NjI1IC0wLjExMjUsLTAuMDI1IGMgLTMuNzM3NSwwIC02LjY1LDMuMSAtNi42NSw3LjAyNSAwLDQuMTI1IDIuOTEyNSw3LjQyNSA2LjY1LDcuNDI1IGwgMC4xMTI1LC0wLjAyNSAwLDQuNzYyNSAtMC4xMTI1LDAuMDEyNSBjIC02LjY1LDAgLTEyLjA1LC01LjM2MjUgLTEyLjA1LC0xMi4xNzUgMCwtNi42MTI1IDUuNCwtMTEuNzc1IDEyLjA1LC0xMS43NzUgeiIKICAgICAgICAgaW5rc2NhcGU6Y29ubmVjdG9yLWN1cnZhdHVyZT0iMCIgLz4KICAgICAgPHBhdGgKICAgICAgICAgaWQ9InBhdGgzNDM3IgogICAgICAgICBzdHlsZT0iZmlsbDojZWQxYzI0O2ZpbGwtb3BhY2l0eToxO2ZpbGwtcnVsZTpldmVub2RkO3N0cm9rZTpub25lIgogICAgICAgICBkPSJtIDUxLjMzMDgwNCwtODguMDI5NzgyIDIuMzEyNSwwLjIyNSBjIDUuNDg3NSwxLjA3NSA5LjYyNSw1Ljc1IDkuNjI1LDExLjUzNzUgMCw1Ljk1IC00LjEzNzUsMTAuODEyNSAtOS42MjUsMTEuOTI1IGwgLTIuMzEyNSwwLjIzNzUgMCwtNC43NjI1IDIuNTM3NSwtMC41NSBjIDIuNDUsLTEuMTI1IDQuMjEyNSwtMy43NjI1IDQuMjEyNSwtNi44NSAwLC0yLjk1IC0xLjc2MjUsLTUuNDI1IC00LjIxMjUsLTYuNDc1IGwgLTIuNTM3NSwtMC41MjUgMCwtNC43NjI1IHoiCiAgICAgICAgIGlua3NjYXBlOmNvbm5lY3Rvci1jdXJ2YXR1cmU9IjAiIC8+CiAgICAgIDxwYXRoCiAgICAgICAgIGlkPSJwYXRoMzQzOSIKICAgICAgICAgc3R5bGU9ImZpbGw6I2VkMWMyNDtmaWxsLW9wYWNpdHk6MTtmaWxsLXJ1bGU6ZXZlbm9kZDtzdHJva2U6bm9uZSIKICAgICAgICAgZD0ibSA2NC4zMDU4MDQsLTg3LjYyOTc4MiBjIDAsMCAwLDAgNi45NjI1LDAgbCAzLjMyNSwwIDAsNC4zMzc1IC0wLjMxMjUsMCBjIC0wLjQxMjUsMCAtMS4yNSwwIC0yLjkxMjUsMCAwLDAgMCwwIDAsNC43NSAwLDAgMCwwIDEuNDEyNSwwIGwgMS44MTI1LDAgMCw0LjEyNSAtMS4wNjI1LDAgYyAtMC41MjUsMCAtMS4yMjUsMCAtMi4xNjI1LDAgMCwwIDAsMCAwLDUuMTYyNSAwLDAuMjEyNSAwLDAuMjEyNSAwLjIxMjUsMC4yMTI1IDAsMCAwLDAgMS40ODc1LDAgbCAxLjUyNSwwIDAsNC41Mzc1IC0wLjQzNzUsMCBjIC0wLjc1LDAgLTIuMjYyNSwwIC01LjI3NSwwIC0xLjY2MjUsMCAtMi40ODc1LC0wLjgyNSAtMi40ODc1LC0yLjY4NzUgbCAwLC0xNi4xIGMgMCwwIDAsMCAtMi4wODc1LDAgMCwwIDAsMCAwLC00LjMzNzUgeiIKICAgICAgICAgaW5rc2NhcGU6Y29ubmVjdG9yLWN1cnZhdHVyZT0iMCIgLz4KICAgICAgPHBhdGgKICAgICAgICAgaWQ9InBhdGgzNDQxIgogICAgICAgICBzdHlsZT0iZmlsbDojZWQxYzI0O2ZpbGwtb3BhY2l0eToxO2ZpbGwtcnVsZTpldmVub2RkO3N0cm9rZTpub25lIgogICAgICAgICBkPSJtIDc0LjU5MzMwNCwtODcuNjI5NzgyIDAuMSwwIGMgNC41NzUsMCA3LjI3NSwyLjQ3NSA3LjI3NSw2LjIgMCwyLjI2MjUgLTEuMDM3NSwzLjcxMjUgLTIuMDc1LDQuNzUgMS44NzUsMC44MjUgMy4xMTI1LDIuODg3NSAzLjExMjUsNS4xNSAwLDQuMzM3NSAtMy4zMjUsNy4wMjUgLTguMSw3LjAyNSAwLDAgMCwwIC0wLjA4NzUsMCBsIC0wLjIyNSwwIDAsLTQuNTM3NSAwLjUxMjUsMCBjIDEuNjYyNSwwIDIuNzEyNSwtMS4wMzc1IDIuNzEyNSwtMi42ODc1IDAsLTEuNjUgLTEuMDUsLTIuNjg3NSAtMi43MTI1LC0yLjY4NzUgMCwwIDAsMCAtMC40NjI1LDAgbCAtMC4wNSwwIDAsLTQuMTI1IDAuMSwwIGMgMS40NjI1LDAgMi4yODc1LC0xLjAzNzUgMi4yODc1LC0yLjQ3NSAwLC0xLjQ1IC0wLjgyNSwtMi4yNzUgLTIuMjg3NSwtMi4yNzUgMCwwIDAsMCAtMC4wNSwwIGwgLTAuMDUsMCAwLC00LjMzNzUgeiIKICAgICAgICAgaW5rc2NhcGU6Y29ubmVjdG9yLWN1cnZhdHVyZT0iMCIgLz4KICAgICAgPHBhdGgKICAgICAgICAgaWQ9InBhdGgzNDQzIgogICAgICAgICBzdHlsZT0iZmlsbDojZWQxYzI0O2ZpbGwtb3BhY2l0eToxO2ZpbGwtcnVsZTpldmVub2RkO3N0cm9rZTpub25lIgogICAgICAgICBkPSJtIDkyLjU2ODMwNCwtODcuNjI5NzgyIGMgMCwwIDAsMCAyLjEsMCBsIDAuMzg3NSwwIDAsNi42MTI1IGMgLTAuMiwwLjQxMjUgLTAuNDEyNSwxLjAyNSAtMC40MTI1LDEuNjUgMCwwIDAsMCAtMS42NjI1LDQuNzUgMCwwIDAsMCAxLjc2MjUsMCBsIDAuMzEyNSwwIDAsNC4zMjUgLTEuMTI1LDAgYyAtMC42Mzc1LDAgLTEuMzYyNSwwIC0yLjE4NzUsMCAwLDAgMCwwIC0xLjQ2MjUsMy43MjUgLTAuNDEyNSwxLjQzNzUgLTEuMjM3NSwyLjA2MjUgLTIuOSwyLjA2MjUgMCwwIDAsMCAtMy4xMjUsMCAwLDAgMCwwIDAsLTQuNTM3NSAwLDAgMCwwIDEuMDM3NSwwIDAuNDI1LDAgMC40MjUsMCAwLjYyNSwtMC4yMTI1IDAsMCAwLDAgNi42NSwtMTguMzc1IHoiCiAgICAgICAgIGlua3NjYXBlOmNvbm5lY3Rvci1jdXJ2YXR1cmU9IjAiIC8+CiAgICAgIDxwYXRoCiAgICAgICAgIGlkPSJwYXRoMzQ0NSIKICAgICAgICAgc3R5bGU9ImZpbGw6I2VkMWMyNDtmaWxsLW9wYWNpdHk6MTtmaWxsLXJ1bGU6ZXZlbm9kZDtzdHJva2U6bm9uZSIKICAgICAgICAgZD0ibSA5NS4wNTU4MDQsLTg3LjYyOTc4MiAyLjUsMCBjIDAsMCAwLDAgNi42NDk5OTYsMTguMzc1IDAuMiwwLjIxMjUgMC4yLDAuMjEyNSAwLjYxMjUsMC4yMTI1IDAsMCAwLDAgMC44Mzc1LDAgMCwwIDAsMCAwLDQuNTM3NSAwLDAgMCwwIC0yLjkxMjUsMCAtMS42NjI1LDAgLTIuNDg3NSwtMC42MjUgLTIuOTEyNDk2LC0yLjI3NSAwLDAgMCwwIC0xLjQ1LC0zLjUxMjUgMCwwIDAsMCAtMi44LDAgbCAtMC41MjUsMCAwLC00LjMyNSAyLjA3NSwwIGMgMCwwIDAsMCAtMS42NSwtNC43NSAwLC0wLjYyNSAtMC4yMTI1LC0xLjIzNzUgLTAuNDI1LC0xLjY1IGwgMCwtNi42MTI1IHoiCiAgICAgICAgIGlua3NjYXBlOmNvbm5lY3Rvci1jdXJ2YXR1cmU9IjAiIC8+CiAgICAgIDxwYXRoCiAgICAgICAgIGlkPSJwYXRoMzQ0NyIKICAgICAgICAgc3R5bGU9ImZpbGw6I2VkMWMyNDtmaWxsLW9wYWNpdHk6MTtmaWxsLXJ1bGU6ZXZlbm9kZDtzdHJva2U6bm9uZSIKICAgICAgICAgZD0ibSAxNS4wNjgzMDQsLTU3LjkwNDc4MiBjIDAsMCAwLDAgMTguMDc1LDAgMS42NjI1LDAgMi43LDAuODI1IDIuNywyLjY4NzUgMCwwIDAsMCAwLDE1LjY4NzUgMCwwLjIgMCwwLjIgMC4yMTI1LDAuMiAwLDAgMCwwIDEuNjYyNSwwIDAsMCAwLDAgMCw0LjU1IDAsMCAwLDAgLTQuMzYyNSwwIC0xLjg3NSwwIC0yLjcsLTAuODI1IC0yLjcsLTIuNjg3NSAwLDAgMCwwIDAsLTE1Ljg4NzUgMCwwIDAsLTAuMjEyNSAtMC4yMTI1LC0wLjIxMjUgMCwwIDAsMCAtOC4zMTI1LDAgMCwwIDAsMCAwLDE4Ljc4NzUgMCwwIDAsMCAtNC45ODc1LDAgMCwwIDAsMCAwLC0xOC43ODc1IDAsMCAwLDAgLTIuMDc1LDAgMCwwIDAsMCAwLC00LjMzNzUgeiIKICAgICAgICAgaW5rc2NhcGU6Y29ubmVjdG9yLWN1cnZhdHVyZT0iMCIgLz4KICAgICAgPHBhdGgKICAgICAgICAgaWQ9InBhdGgzNDQ5IgogICAgICAgICBzdHlsZT0iZmlsbDojZWQxYzI0O2ZpbGwtb3BhY2l0eToxO2ZpbGwtcnVsZTpldmVub2RkO3N0cm9rZTpub25lIgogICAgICAgICBkPSJtIDUwLjgwNTgwNCwtNTguMzE3MjgyIDAuMSwwLjAxMjUgMCw0Ljc2MjUgLTAuMSwtMC4wMjUgYyAtMy43NSwwIC02LjY1LDMuMSAtNi42NSw3LjAyNSAwLDQuMTI1IDIuOSw3LjQyNSA2LjY1LDcuNDI1IGwgMC4xLC0wLjAyNSAwLDQuNzYyNSAtMC4xLDAuMDEyNSBjIC02LjY1LDAgLTExLjg1LC01LjM3NSAtMTEuODUsLTEyLjE3NSAwLC02LjYxMjUgNS4yLC0xMS43NzUgMTEuODUsLTExLjc3NSB6IgogICAgICAgICBpbmtzY2FwZTpjb25uZWN0b3ItY3VydmF0dXJlPSIwIiAvPgogICAgICA8cGF0aAogICAgICAgICBpZD0icGF0aDM0NTEiCiAgICAgICAgIHN0eWxlPSJmaWxsOiNlZDFjMjQ7ZmlsbC1vcGFjaXR5OjE7ZmlsbC1ydWxlOmV2ZW5vZGQ7c3Ryb2tlOm5vbmUiCiAgICAgICAgIGQ9Im0gNTAuOTA1ODA0LC01OC4zMDQ3ODIgMi4zODc1LDAuMjI1IGMgNS41ODc1LDEuMDc1IDkuNTYyNSw1Ljc1IDkuNTYyNSwxMS41Mzc1IDAsNS45NSAtMy45NzUsMTAuODEyNSAtOS41NjI1LDExLjkyNSBsIC0yLjM4NzUsMC4yMzc1IDAsLTQuNzYyNSAyLjYzNzUsLTAuNTUgYyAyLjQ4NzUsLTEuMTI1IDQuMTI1LC0zLjc2MjUgNC4xMjUsLTYuODUgMCwtMi45NSAtMS42Mzc1LC01LjQyNSAtNC4xMjUsLTYuNDc1IGwgLTIuNjM3NSwtMC41MjUgMCwtNC43NjI1IHoiCiAgICAgICAgIGlua3NjYXBlOmNvbm5lY3Rvci1jdXJ2YXR1cmU9IjAiIC8+CiAgICAgIDxwYXRoCiAgICAgICAgIGlkPSJwYXRoMzQ1MyIKICAgICAgICAgc3R5bGU9ImZpbGw6I2VkMWMyNDtmaWxsLW9wYWNpdHk6MTtmaWxsLXJ1bGU6ZXZlbm9kZDtzdHJva2U6bm9uZSIKICAgICAgICAgZD0ibSA2My44OTMzMDQsLTU3LjkwNDc4MiBjIDAsMCAwLDAgNC41NzUsMCAxLjY2MjUsMCAyLjQ4NzUsMC44MjUgMi40ODc1LDIuNjg3NSAwLDAgMCwwIDAsMTUuNjg3NSAwLDAuMiAwLDAuMiAwLjIxMjUsMC4yIDAsMCAwLDAgNi4wMjUsMCAwLDAgMCwwIDAsLTE4LjU3NSAwLDAgMCwwIDQuOTg3NSwwIDAsMCAwLDAgMCwxOC41NzUgMCwwIDAsMCA2LjAyNSwwIDAuMjEyNSwwIDAuMjEyNSwwIDAuMjEyNSwtMC4yIDAsMCAwLDAgMCwtMTUuNjg3NSAwLC0xLjg2MjUgMC44MjUsLTIuNjg3NSAyLjQ4NzUsLTIuNjg3NSAwLDAgMCwwIDQuNTc1LDAgMCwwIDAsMCAwLDQuMzM3NSAwLDAgMCwwIC0xLjg3NSwwIC0wLjIxMjUsMCAtMC4yMTI1LDAuMjEyNSAtMC4yMTI1LDAuMjEyNSAwLDAgMCwwIDAsMTUuODg3NSAwLDEuODYyNSAtMC44MjUsMi42ODc1IC0yLjQ4NzUsMi42ODc1IDAsMCAwLDAgLTIyLjIzNzUsMCAtMS44NjI1LDAgLTIuNywtMC44MjUgLTIuNywtMi42ODc1IDAsMCAwLDAgMCwtMTUuODg3NSAwLDAgMCwtMC4yMTI1IC0wLjIsLTAuMjEyNSAwLDAgMCwwIC0xLjg3NSwwIDAsMCAwLDAgMCwtNC4zMzc1IHoiCiAgICAgICAgIGlua3NjYXBlOmNvbm5lY3Rvci1jdXJ2YXR1cmU9IjAiIC8+CiAgICAgIDxwYXRoCiAgICAgICAgIGlkPSJwYXRoMzQ1NSIKICAgICAgICAgc3R5bGU9ImZpbGw6I2VkMWMyNDtmaWxsLW9wYWNpdHk6MTtmaWxsLXJ1bGU6ZXZlbm9kZDtzdHJva2U6bm9uZSIKICAgICAgICAgZD0ibSA5OS40MTgzMDQsLTU3LjkwNDc4MiBjIDAsMCAwLDAgMTUuNTg3NDk2LDAgMS44NzUsMCAyLjUsMC44MjUgMi41LDIuNDc1IDAsMCAwLDAgMCwzLjkyNSBsIC00LjU3NSwwIGMgMCwwIDAsMCAwLC0xLjg1IDAsLTAuMjEyNSAwLC0wLjIxMjUgLTAuMjEyNSwtMC4yMTI1IDAsMCAwLDAgLTIuOSwwIDAsMCAwLDAgMCwxOC43ODc1IDAsMCAwLDAgLTUsMCAwLDAgMCwwIDAsLTE4Ljc4NzUgMCwwIDAsMCAtMi45LDAgLTAuMjEyNSwwIC0wLjIxMjUsMCAtMC4yMTI1LDAuMjEyNSAwLDAgMCwwIDAsMS44NSAwLDAgMCwwIC00LjU3NDk5NiwwIDAsMCAwLDAgMCwtMy45MjUgMCwtMS42NSAwLjYyNSwtMi40NzUgMi4yODc1LC0yLjQ3NSB6IgogICAgICAgICBpbmtzY2FwZTpjb25uZWN0b3ItY3VydmF0dXJlPSIwIiAvPgogICAgICA8cGF0aAogICAgICAgICBpZD0icGF0aDM0NTciCiAgICAgICAgIHN0eWxlPSJmaWxsOiNlZDFjMjQ7ZmlsbC1vcGFjaXR5OjE7ZmlsbC1ydWxlOmV2ZW5vZGQ7c3Ryb2tlOm5vbmUiCiAgICAgICAgIGQ9Im0gMTIzLjk0MzMsLTU3LjkwNDc4MiBjIDAsMCAwLDAgMi4xLDAgbCAwLjM4NzUsMCAwLDYuNjEyNSBjIC0wLjIxMjUsMC40MTI1IC0wLjQxMjUsMS4wMjUgLTAuNDEyNSwxLjY1IDAsMCAwLDAgLTEuNjYyNSw0Ljc1IDAsMCAwLDAgMS43NSwwIGwgMC4zMjUsMCAwLDQuMzI1IC0xLjEyNSwwIGMgLTAuNjM3NSwwIC0xLjM2MjUsMCAtMi4yLDAgMCwwIDAsMCAtMS40NSwzLjUxMjUgLTAuNDEyNSwxLjY1IC0xLjI1LDIuMjc1IC0yLjkxMjUsMi4yNzUgMCwwIDAsMCAtMy4xMTI1LDAgMCwwIDAsMCAwLC00LjU1IDAsMCAwLDAgMS4wMzc1LDAgMC40MjUsMCAwLjQyNSwwIDAuNjI1LC0wLjIgMCwwIDAsMCA2LjY1LC0xOC4zNzUgeiIKICAgICAgICAgaW5rc2NhcGU6Y29ubmVjdG9yLWN1cnZhdHVyZT0iMCIgLz4KICAgICAgPHBhdGgKICAgICAgICAgaWQ9InBhdGgzNDU5IgogICAgICAgICBzdHlsZT0iZmlsbDojZWQxYzI0O2ZpbGwtb3BhY2l0eToxO2ZpbGwtcnVsZTpldmVub2RkO3N0cm9rZTpub25lIgogICAgICAgICBkPSJtIDEyNi40MzA4LC01Ny45MDQ3ODIgMi40ODc1LDAgYyAwLDAgMCwwIDYuNjYyNSwxOC4zNzUgMC4yLDAuMiAwLjIsMC4yIDAuNjI1LDAuMiBsIDAuODI1LDAgYyAwLDAgMCwwIDAsNC41NSAwLDAgMCwwIC0yLjkxMjUsMCAtMS42NjI1LDAgLTIuNDg3NSwtMC42MjUgLTIuOTEyNSwtMi4yNzUgMCwwIDAsMCAtMS40NSwtMy41MTI1IDAsMCAwLDAgLTIuOCwwIGwgLTAuNTI1LDAgMCwtNC4zMjUgMi4wNzUsMCBjIDAsMCAwLDAgLTEuNjYyNSwtNC43NSAwLC0wLjYyNSAtMC4yLC0xLjIzNzUgLTAuNDEyNSwtMS42NSBsIDAsLTYuNjEyNSB6IgogICAgICAgICBpbmtzY2FwZTpjb25uZWN0b3ItY3VydmF0dXJlPSIwIiAvPgogICAgICA8cGF0aAogICAgICAgICBpZD0icGF0aDM0NjEiCiAgICAgICAgIHN0eWxlPSJmaWxsOiNlZDFjMjQ7ZmlsbC1vcGFjaXR5OjE7ZmlsbC1ydWxlOmV2ZW5vZGQ7c3Ryb2tlOm5vbmUiCiAgICAgICAgIGQ9Im0gLTE2Ljk1NjY5NiwtNzcuNzkyMjgyIGMgMC4yMzc1LC0wLjA3NSAwLjU1LDAuMDc1IDAuODYyNSwwLjQ4NzUgMCwwIDAsMCAxNC4xMjQ5OTk2LDEzLjgyNSAwLjgyNSwwLjgyNSAwLjgyNSwyLjA3NSAwLDIuNjg3NSAwLDAgMCwwIC0xNC4xMjQ5OTk2LDE0LjAzNzUgLTAuMzEyNSwwLjQxMjUgLTAuNjI1LDAuNTEyNSAtMC44NjI1LDAuMzg3NSAtMC4yMzc1LC0wLjEyNSAtMC4zODc1LC0wLjQ4NzUgLTAuMzg3NSwtMS4wMTI1IGwgMCwtMjkuNTEyNSBjIDAsLTAuNTEyNSAwLjE1LC0wLjgyNSAwLjM4NzUsLTAuOSB6IgogICAgICAgICBpbmtzY2FwZTpjb25uZWN0b3ItY3VydmF0dXJlPSIwIiAvPgogICAgICA8cGF0aAogICAgICAgICBpZD0icGF0aDM0NjMiCiAgICAgICAgIHN0eWxlPSJmaWxsOiNlZDFjMjQ7ZmlsbC1vcGFjaXR5OjE7ZmlsbC1ydWxlOmV2ZW5vZGQ7c3Ryb2tlOm5vbmUiCiAgICAgICAgIGQ9Im0gLTQxLjExOTE5NiwtMTAwLjgyOTc4IDEsMCAwLjk2MjUsMC40IGMgMCwwIDAsMCAxNC41Mzc1LDE0LjQ0OTk5OCAwLjYyNSwwLjgyNSAwLjQxMjUsMS40NSAtMC42MjUsMS40NSAwLDAgMCwwIC02LjAyNSwwIC0xLjAzNzUsMCAtMS44NjI1LDAuODI1IC0xLjg2MjUsMS44NjI1IDAsMCAwLDAgMCwxMC43MjUgMCwxLjAzNzUgLTAuODM3NSwxLjg2MjUgLTIuMDg3NSwxLjg2MjUgMCwwIDAsMCAtMTAuNTg3NSwwIC0xLjAzNzUsMCAtMS44NzUsLTAuODI1IC0xLjg3NSwtMS44NjI1IDAsMCAwLDAgMCwtMTAuNzI1IDAsLTEuMDM3NSAtMC44MjUsLTEuODYyNSAtMS44NzUsLTEuODYyNSBsIC02LjQzNzUsMCBjIC0xLjAzNzUsMCAtMS4yNSwtMC42MjUgLTAuNjI1LC0xLjQ1IDAsMCAwLDAgMTQuNTUsLTE0LjQ0OTk5OCBsIDAuOTUsLTAuNCB6IgogICAgICAgICBpbmtzY2FwZTpjb25uZWN0b3ItY3VydmF0dXJlPSIwIiAvPgogICAgICA8cGF0aAogICAgICAgICBpZD0icGF0aDM0NjUiCiAgICAgICAgIHN0eWxlPSJmaWxsOiNlZDFjMjQ7ZmlsbC1vcGFjaXR5OjE7ZmlsbC1ydWxlOmV2ZW5vZGQ7c3Ryb2tlOm5vbmUiCiAgICAgICAgIGQ9Im0gLTYzLjg5NDE5NiwtNzguMTA0NzgyIGMgMC4yNjI1LDAuMTI1IDAuNDI1LDAuNDg3NSAwLjQyNSwxLjAxMjUgbCAwLDMwLjEyNSBjIDAsMC41MjUgLTAuMTYyNSwwLjgzNzUgLTAuNDI1LDAuOTM3NSAtMC4yNSwwLjEgLTAuNjEyNSwwIC0xLjAzNzUsLTAuMzEyNSAwLDAgMCwwIC0xNC4zMzc1LC0xNC40NSAtMC44MjUsLTAuNjEyNSAtMC44MjUsLTEuODYyNSAwLC0yLjY4NzUgMCwwIDAsMCAxNC4zMzc1LC0xNC4yMzc1IDAuNDI1LC0wLjQxMjUgMC43ODc1LC0wLjUxMjUgMS4wMzc1LC0wLjM4NzUgeiIKICAgICAgICAgaW5rc2NhcGU6Y29ubmVjdG9yLWN1cnZhdHVyZT0iMCIgLz4KICAgICAgPHBhdGgKICAgICAgICAgaWQ9InBhdGgzNDY3IgogICAgICAgICBzdHlsZT0iZmlsbDojZWQxYzI0O2ZpbGwtb3BhY2l0eToxO2ZpbGwtcnVsZTpldmVub2RkO3N0cm9rZTpub25lIgogICAgICAgICBkPSJtIC00NS44MDY2OTYsLTU0LjM5MjI4MiBjIDAsMCAwLDAgMTAuNTg3NSwwIDEuMjUsMCAyLjA4NzUsMC44MjUgMi4wODc1LDEuODYyNSAwLDAgMCwwIDAsMTEuMzUgMCwxLjIzNzUgMC44MjUsMi4wNjI1IDEuODYyNSwyLjA2MjUgbCA1LjYxMjUsMCBjIDEuMDM3NSwwIDEuNDUsMC42MTI1IDAuNjI1LDEuMjM3NSAwLDAgMCwwIC0xNC4xMjUsMTQuMjM3NSAtMC40MjUsMC40MTI1IC0wLjkzNzUsMC42MjUgLTEuNDYyNSwwLjYyNSAtMC41MTI1LDAgLTEuMDM3NSwtMC4yMTI1IC0xLjQ1LC0wLjYyNSAwLDAgMCwwIC0xNC4xMjUsLTE0LjIzNzUgLTAuODM3NSwtMC42MjUgLTAuNDI1LC0xLjIzNzUgMC42MTI1LC0xLjIzNzUgMCwwIDAsMCA2LjAyNSwwIDEuMDUsMCAxLjg3NSwtMC44MjUgMS44NzUsLTIuMDYyNSAwLDAgMCwwIDAsLTExLjM1IDAsLTEuMDM3NSAwLjgzNzUsLTEuODYyNSAxLjg3NSwtMS44NjI1IHoiCiAgICAgICAgIGlua3NjYXBlOmNvbm5lY3Rvci1jdXJ2YXR1cmU9IjAiIC8+CiAgICA8L2c+CiAgPC9nPgo8L3N2Zz4K" alt="" height="20" style="max-width:58px;display:block;object-fit:contain"></span>
+          </button>
+          <button class="dtab" onclick="setDelivery('up',this)">
+            Укрпошта
+            <span class="dtab-logo"><svg height="22" viewBox="0 0 36 34" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M35.7289 0C35.7289 0 28.9377 18.9806 26.5564 24.1632C24.175 29.3458 20.1135 34 13.2146 34C5.91639 34 0 28.1285 0 20.8857C1.30727e-05 15.0102 3.89347 10.0373 9.25957 8.3691L12.6923 16.0626C10.2386 16.3213 8.32704 18.3819 8.32703 20.8857C8.32703 23.5645 10.5153 25.7362 13.2146 25.7362C15.9139 25.7362 18.0394 23.5645 18.0394 20.8857C18.0394 19.6281 17.634 18.5161 17.1971 17.5622C16.7604 16.6087 9.40102 0.0129734 9.39526 0H35.7289Z" fill="#FFBE0C"/></svg></span>
+          </button>
+        </div>
+
+        <div id="npFields">
+          <div class="field">
+            <label for="npCity">Місто / Населений пункт</label>
+            <div class="ac-wrap">
+              <input type="text" id="npCity" placeholder="Введіть назву міста..." autocomplete="off" />
+              <div class="ac-list" id="npCityList"></div>
+            </div>
+            <span id="npCityErr" style="font-size:12px;color:#c0392b;display:none">Оберіть місто зі списку</span>
+          </div>
+          <div class="field" id="npBranchWrap" style="display:none">
+            <label for="npBranch">Відділення або поштомат</label>
+            <div class="ac-wrap">
+              <input type="text" id="npBranch" placeholder="Введіть номер або адресу відділення..." autocomplete="off" />
+              <div class="ac-list" id="npBranchList"></div>
+            </div>
+            <span id="npBranchErr" style="font-size:12px;color:#c0392b;display:none">Оберіть відділення</span>
+          </div>
+        </div>
+
+        <div id="upFields" style="display:none">
+          <div class="field">
+            <label for="upCity">Місто</label>
+            <input type="text" id="upCity" placeholder="Введіть місто..." />
+          </div>
+          <div class="field">
+            <label for="upAddress">Адреса відділення / поштовий індекс</label>
+            <input type="text" id="upAddress" placeholder="вул. Центральна, 1 або індекс 01001" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. CONTACTS -->
+      <div class="sec">
+        <h2 class="sec__h">Контактні дані</h2>
+        <div class="row2">
+          <div class="field">
+            <label for="firstName">Ім'я</label>
+            <input type="text" id="firstName" placeholder="Ім'я" autocomplete="given-name" />
+            <span class="err-msg">Вкажіть ім'я</span>
+          </div>
+          <div class="field">
+            <label for="lastName">Прізвище</label>
+            <input type="text" id="lastName" placeholder="Прізвище" autocomplete="family-name" />
+            <span class="err-msg">Вкажіть прізвище</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="phone">Номер телефону</label>
+          <input type="tel" id="phone" placeholder="+380XXXXXXXXX" autocomplete="tel" />
+          <span class="err-msg">Вкажіть коректний номер</span>
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="your@email.com" autocomplete="email" />
+          <span class="err-msg">Вкажіть коректний email</span>
+        </div>
+      </div>
+
+      <!-- 3. PAYMENT — Apple/Google Pay first -->
+      <div class="sec">
+        <h2 class="sec__h">Спосіб оплати</h2>
+        <div class="pay-methods">
+
+          <!-- Apple Pay / Google Pay -->
+          <label class="pay-method active" onclick="selectPay(this)">
+            <input type="radio" name="payment" value="applegoogle" checked />
+            <div class="pay-radio"></div>
+            <div class="pay-info">
+              <div class="pay-name">Apple Pay / Google Pay</div>
+              <div class="pay-desc">Один дотик — і оплачено</div>
+            </div>
+            <div class="pay-logos">
+              <!-- Apple Pay real logo -->
+              <span style="display:inline-flex;align-items:center;background:#000;border-radius:6px;padding:4px 8px;height:28px;box-sizing:border-box">
+                <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDIxLjAuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgYmFzZVByb2ZpbGU9InRpbnkiIGlkPSJMYXllcl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIgoJIHg9IjBweCIgeT0iMHB4IiB2aWV3Qm94PSIwIDAgNTEyIDIxMC4yIiB4bWw6c3BhY2U9InByZXNlcnZlIj4KPHBhdGggaWQ9IlhNTElEXzM0XyIgZD0iTTkzLjYsMjcuMUM4Ny42LDM0LjIsNzgsMzkuOCw2OC40LDM5Yy0xLjItOS42LDMuNS0xOS44LDktMjYuMWM2LTcuMywxNi41LTEyLjUsMjUtMTIuOQoJQzEwMy40LDEwLDk5LjUsMTkuOCw5My42LDI3LjEgTTEwMi4zLDQwLjljLTEzLjktMC44LTI1LjgsNy45LTMyLjQsNy45Yy02LjcsMC0xNi44LTcuNS0yNy44LTcuM2MtMTQuMywwLjItMjcuNiw4LjMtMzQuOSwyMS4yCgljLTE1LDI1LjgtMy45LDY0LDEwLjYsODVjNy4xLDEwLjQsMTUuNiwyMS44LDI2LjgsMjEuNGMxMC42LTAuNCwxNC44LTYuOSwyNy42LTYuOWMxMi45LDAsMTYuNiw2LjksMjcuOCw2LjcKCWMxMS42LTAuMiwxOC45LTEwLjQsMjYtMjAuOGM4LjEtMTEuOCwxMS40LTIzLjMsMTEuNi0yMy45Yy0wLjItMC4yLTIyLjQtOC43LTIyLjYtMzQuM2MtMC4yLTIxLjQsMTcuNS0zMS42LDE4LjMtMzIuMgoJQzEyMy4zLDQyLjksMTA3LjcsNDEuMywxMDIuMyw0MC45IE0xODIuNiwxMS45djE1NS45aDI0LjJ2LTUzLjNoMzMuNWMzMC42LDAsNTIuMS0yMSw1Mi4xLTUxLjRjMC0zMC40LTIxLjEtNTEuMi01MS4zLTUxLjJIMTgyLjZ6CgkgTTIwNi44LDMyLjNoMjcuOWMyMSwwLDMzLDExLjIsMzMsMzAuOWMwLDE5LjctMTIsMzEtMzMuMSwzMWgtMjcuOFYzMi4zeiBNMzM2LjYsMTY5YzE1LjIsMCwyOS4zLTcuNywzNS43LTE5LjloMC41djE4LjdoMjIuNFY5MC4yCgljMC0yMi41LTE4LTM3LTQ1LjctMzdjLTI1LjcsMC00NC43LDE0LjctNDUuNCwzNC45aDIxLjhjMS44LTkuNiwxMC43LTE1LjksMjIuOS0xNS45YzE0LjgsMCwyMy4xLDYuOSwyMy4xLDE5LjZ2OC42bC0zMC4yLDEuOAoJYy0yOC4xLDEuNy00My4zLDEzLjItNDMuMywzMy4yQzI5OC40LDE1NS42LDMxNC4xLDE2OSwzMzYuNiwxNjl6IE0zNDMuMSwxNTAuNWMtMTIuOSwwLTIxLjEtNi4yLTIxLjEtMTUuN2MwLTkuOCw3LjktMTUuNSwyMy0xNi40CglsMjYuOS0xLjd2OC44QzM3MS45LDE0MC4xLDM1OS41LDE1MC41LDM0My4xLDE1MC41eiBNNDI1LjEsMjEwLjJjMjMuNiwwLDM0LjctOSw0NC40LTM2LjNMNTEyLDU0LjdoLTI0LjZsLTI4LjUsOTIuMWgtMC41CglsLTI4LjUtOTIuMWgtMjUuM2w0MSwxMTMuNWwtMi4yLDYuOWMtMy43LDExLjctOS43LDE2LjItMjAuNCwxNi4yYy0xLjksMC01LjYtMC4yLTcuMS0wLjR2MTguN0M0MTcuMywyMTAsNDIzLjMsMjEwLjIsNDI1LjEsMjEwLjJ6CgkiLz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPC9zdmc+Cg==" alt="Apple Pay" height="16" style="display:block;filter:invert(1)">
+              </span>
+              <!-- Google Pay real logo -->
+              <span style="display:inline-flex;align-items:center;background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:4px 8px;height:28px;box-sizing:border-box">
+                <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCA4MCAzOC4xIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA4MCAzOC4xOyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+Cgkuc3Qwe2ZpbGw6IzVGNjM2ODt9Cgkuc3Qxe2ZpbGw6IzQyODVGNDt9Cgkuc3Qye2ZpbGw6IzM0QTg1Mzt9Cgkuc3Qze2ZpbGw6I0ZCQkMwNDt9Cgkuc3Q0e2ZpbGw6I0VBNDMzNTt9Cjwvc3R5bGU+CjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0zNy44LDE5LjdWMjloLTNWNmg3LjhjMS45LDAsMy43LDAuNyw1LjEsMmMxLjQsMS4yLDIuMSwzLDIuMSw0LjljMCwxLjktMC43LDMuNi0yLjEsNC45Yy0xLjQsMS4zLTMuMSwyLTUuMSwyCglMMzcuOCwxOS43TDM3LjgsMTkuN3ogTTM3LjgsOC44djhoNWMxLjEsMCwyLjItMC40LDIuOS0xLjJjMS42LTEuNSwxLjYtNCwwLjEtNS41YzAsMC0wLjEtMC4xLTAuMS0wLjFjLTAuOC0wLjgtMS44LTEuMy0yLjktMS4yCglMMzcuOCw4LjhMMzcuOCw4Ljh6Ii8+CjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik01Ni43LDEyLjhjMi4yLDAsMy45LDAuNiw1LjIsMS44czEuOSwyLjgsMS45LDQuOFYyOUg2MXYtMi4yaC0wLjFjLTEuMiwxLjgtMi45LDIuNy00LjksMi43CgljLTEuNywwLTMuMi0wLjUtNC40LTEuNWMtMS4xLTEtMS44LTIuNC0xLjgtMy45YzAtMS42LDAuNi0yLjksMS44LTMuOWMxLjItMSwyLjktMS40LDQuOS0xLjRjMS44LDAsMy4yLDAuMyw0LjMsMXYtMC43CgljMC0xLTAuNC0yLTEuMi0yLjZjLTAuOC0wLjctMS44LTEuMS0yLjktMS4xYy0xLjcsMC0zLDAuNy0zLjksMi4xbC0yLjYtMS42QzUxLjgsMTMuOCw1My45LDEyLjgsNTYuNywxMi44eiBNNTIuOSwyNC4yCgljMCwwLjgsMC40LDEuNSwxLDEuOWMwLjcsMC41LDEuNSwwLjgsMi4zLDAuOGMxLjIsMCwyLjQtMC41LDMuMy0xLjRjMS0wLjksMS41LTIsMS41LTMuMmMtMC45LTAuNy0yLjItMS4xLTMuOS0xLjEKCWMtMS4yLDAtMi4yLDAuMy0zLDAuOUM1My4zLDIyLjYsNTIuOSwyMy4zLDUyLjksMjQuMnoiLz4KPHBhdGggY2xhc3M9InN0MCIgZD0iTTgwLDEzLjNsLTkuOSwyMi43aC0zbDMuNy03LjlsLTYuNS0xNC43aDMuMmw0LjcsMTEuM2gwLjFsNC42LTExLjNIODB6Ii8+CjxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik0yNS45LDE3LjdjMC0wLjktMC4xLTEuOC0wLjItMi43SDEzLjJ2NS4xaDcuMWMtMC4zLDEuNi0xLjIsMy4xLTIuNiw0djMuM0gyMkMyNC41LDI1LjEsMjUuOSwyMS43LDI1LjksMTcuN3oiCgkvPgo8cGF0aCBjbGFzcz0ic3QyIiBkPSJNMTMuMiwzMC42YzMuNiwwLDYuNi0xLjIsOC44LTMuMmwtNC4zLTMuM2MtMS4yLDAuOC0yLjcsMS4zLTQuNSwxLjNjLTMuNCwwLTYuNC0yLjMtNy40LTUuNUgxLjR2My40CglDMy43LDI3LjgsOC4yLDMwLjYsMTMuMiwzMC42eiIvPgo8cGF0aCBjbGFzcz0ic3QzIiBkPSJNNS44LDE5LjljLTAuNi0xLjYtMC42LTMuNCwwLTUuMXYtMy40SDEuNGMtMS45LDMuNy0xLjksOC4xLDAsMTEuOUw1LjgsMTkuOXoiLz4KPHBhdGggY2xhc3M9InN0NCIgZD0iTTEzLjIsOS40YzEuOSwwLDMuNywwLjcsNS4xLDJsMCwwbDMuOC0zLjhjLTIuNC0yLjItNS42LTMuNS04LjgtMy40Yy01LDAtOS42LDIuOC0xMS44LDcuM2w0LjQsMy40CglDNi44LDExLjcsOS44LDkuNCwxMy4yLDkuNHoiLz4KPC9zdmc+Cg==" alt="Google Pay" height="16" style="display:block">
+              </span>
+            </div>
+          </label>
+
+          <!-- Card -->
+          <label class="pay-method" onclick="selectPay(this)">
+            <input type="radio" name="payment" value="card" />
+            <div class="pay-radio"></div>
+            <div class="pay-info">
+              <div class="pay-name">Картка онлайн</div>
+              <div class="pay-desc">Visa / Mastercard — безпечна оплата через Monobank</div>
+            </div>
+            <div class="pay-logos">
+              <!-- Visa real logo -->
+              <svg width="54" height="28" viewBox="0 0 54 28" fill="none">
+                <rect width="54" height="28" rx="6" fill="white" stroke="#e8e8e8" stroke-width="1"/>
+                <svg x="5" y="7" width="44" height="14" viewBox="0 0 1000 324.68"><path fill="#1434cb" d="m651.19.5c-70.93,0-134.32,36.77-134.32,104.69,0,77.9,112.42,83.28,112.42,122.42,0,16.48-18.88,31.23-51.14,31.23-45.77,0-79.98-20.61-79.98-20.61l-14.64,68.55s39.41,17.41,91.73,17.41c77.55,0,138.58-38.57,138.58-107.66,0-82.32-112.89-87.54-112.89-123.86,0-12.91,15.5-27.05,47.66-27.05,36.29,0,65.89,14.99,65.89,14.99l14.33-66.2S696.61.5,651.18.5h0ZM2.22,5.5L.5,15.49s29.84,5.46,56.72,16.36c34.61,12.49,37.07,19.77,42.9,42.35l63.51,244.83h85.14L379.93,5.5h-84.94l-84.28,213.17-34.39-180.7c-3.15-20.68-19.13-32.48-38.68-32.48,0,0-135.41,0-135.41,0Zm411.87,0l-66.63,313.53h81L494.85,5.5h-80.76Zm451.76,0c-19.53,0-29.88,10.46-37.47,28.73l-118.67,284.8h84.94l16.43-47.47h103.48l9.99,47.47h74.95L934.12,5.5h-68.27Zm11.05,84.71l25.18,117.65h-67.45l42.28-117.65h0Z"/></svg>
+              </svg>
+              <!-- Mastercard real -->
+              <svg width="44" height="28" viewBox="0 0 44 28" fill="none">
+                <rect width="44" height="28" rx="6" fill="white" stroke="#e8e8e8" stroke-width="1"/>
+                <svg x="4" y="2" width="36" height="24" viewBox="0 0 999.2 776">
+                  <rect x="364" y="66.1" fill="#FF5A00" width="270.4" height="485.8"/>
+                  <path fill="#EB001B" d="M382,309c0-98.7,46.4-186.3,117.6-242.9C447.2,24.9,381.1,0,309,0C138.2,0,0,138.2,0,309s138.2,309,309,309c72.1,0,138.2-24.9,190.6-66.1C428.3,496.1,382,407.7,382,309z"/>
+                  <path fill="#F79E1B" d="M999.2,309c0,170.8-138.2,309-309,309c-72.1,0-138.2-24.9-190.6-66.1c72.1-56.7,117.6-144.2,117.6-242.9S570.8,122.7,499.6,66.1C551.9,24.9,618,0,690.1,0C861,0,999.2,139.1,999.2,309z"/>
+                </svg>
+              </svg>
+            </div>
+          </label>
+
+        </div>
+      </div>
+
+      <!-- 4. PET NAME -->
+      <div class="sec">
+        <h2 class="sec__h">Ім'я вашого улюбленця</h2>
+        <div class="field">
+          <label for="petName">Як звати вашого улюбленця?</label>
+          <input type="text" id="petName" placeholder="Наприклад: Ґрейс, Арчі, Луна" maxlength="60" />
+          <span class="err-msg">Вкажіть ім'я улюбленця</span>
+        </div>
+      </div>
+
+      <!-- 5. COMMENT -->
+      <div class="sec">
+        <h2 class="sec__h">Коментар <span class="opt-tag">необов'язково</span></h2>
+        <div class="field">
+          <textarea id="comment" placeholder="Уточнення до замовлення, побажання щодо часу відправки або упаковки..."></textarea>
+        </div>
+      </div>
+
+    </div><!-- /leftCol -->
+
+    <!-- SIDEBAR — naturally after leftCol on mobile (no order:-1) -->
+    <div class="sidebar">
+      <div class="summary">
+        <h2 class="summary__title">Підсумок</h2>
+
+        <div id="orderItems">
+          <p class="oi__empty" id="emptyCart">Кошик порожній — <a href="/" style="color:var(--main)">повернутись до каталогу</a></p>
+        </div>
+
+        <hr class="summary__divider">
+
+        <div id="summaryItems"></div>
+        <div class="sum-row total">
+          <span>До оплати</span>
+          <span id="summaryTotal">0 ₴</span>
+        </div>
+        <p class="sum-note">Якщо замовлення до 15:00 — відправляємо сьогодні</p>
+
+        <button class="btn-checkout" id="btnCheckout" onclick="submitOrder()">
+          <span class="btn-text">Оформити замовлення</span>
+          <div class="btn-spinner"></div>
+        </button>
+        <p class="submit-error" id="submitError"></p>
+        <p class="legal">Натискаючи кнопку, ви погоджуєтесь з умовами продажу. Платіжні дані обробляються Monobank — ми їх не зберігаємо.</p>
+      </div>
+    </div>
+
+  </div><!-- /co -->
+</main>
+
+<script>
+var cartItems = [];
+
+function loadCart() {
+  try {
+    var raw = sessionStorage.getItem('marcelCart');
+    if (raw) cartItems = JSON.parse(raw);
+  } catch(e) { cartItems = []; }
+  renderCart();
+}
+
+function renderCart() {
+  var container = document.getElementById('orderItems');
+  var empty = document.getElementById('emptyCart');
+  var btn = document.getElementById('btnCheckout');
+  if (!cartItems.length) {
+    if(empty) empty.style.display='block';
+    btn.disabled=true;
+    return;
+  }
+  if(empty) empty.style.display='none';
+  btn.disabled = false;
+
+  var html='', sumHtml='', total=0;
+  cartItems.forEach(function(item) {
+    var lt = (item.price||0) * (item.qty||1);
+    total += lt;
+    html += '<div class="oi__item">'
+      + '<img class="oi__img" src="' + (item.img||'') + '" alt="' + item.name + '" onerror="this.style.display=\'none\'">'
+      + '<div class="oi__info"><p class="oi__name">' + item.name + '</p><span class="oi__sub">' + item.weight + ' г &middot; ' + item.qty + ' шт</span></div>'
+      + '<span class="oi__price">' + lt + ' &#8372;</span>'
+      + '</div>';
+    sumHtml += '<div class="sum-row"><span>' + item.name + ' &times;' + item.qty + '</span><span>' + lt + ' &#8372;</span></div>';
+  });
+  container.innerHTML = html;
+  document.getElementById('summaryItems').innerHTML = sumHtml;
+  document.getElementById('summaryTotal').textContent = total + ' ₴';
+}
+
+var deliveryType = 'np', selectedCity = null, selectedBranch = null;
+
+function setDelivery(type, el) {
+  deliveryType = type;
+  document.querySelectorAll('.dtab').forEach(function(t){ t.classList.remove('active'); });
+  el.classList.add('active');
+  document.getElementById('npFields').style.display = type==='np' ? '' : 'none';
+  document.getElementById('upFields').style.display = type==='up' ? '' : 'none';
+}
+
+var cityTimer=null, branchTimer=null;
+
+document.getElementById('npCity').addEventListener('input', function() {
+  var q = this.value.trim();
+  selectedCity = null; selectedBranch = null;
+  document.getElementById('npBranchWrap').style.display = 'none';
+  document.getElementById('npBranch').value = '';
+  clearTimeout(cityTimer);
+  if (q.length < 2) { closeAC('npCityList'); return; }
+  cityTimer = setTimeout(function(){ npCity(q); }, 450);
+});
+
+document.getElementById('npBranch').addEventListener('input', function() {
+  clearTimeout(branchTimer);
+  if (!selectedCity) return;
+  var val = this.value.trim();
+  branchTimer = setTimeout(function(){ npBranch(val); }, 400);
+});
+
+async function npCity(q) {
+  var list = document.getElementById('npCityList');
+  list.innerHTML = '<div class="ac-hint">Пошук...</div>'; list.classList.add('open');
+  try {
+    var r = await fetch('/api/novaposhta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'searchCity',query:q})});
+    var d = await r.json();
+    var cities = (d.data||[]).slice(0,8);
+    if (!cities.length) { list.innerHTML='<div class="ac-hint">Нічого не знайдено</div>'; return; }
+    list.innerHTML = cities.map(function(c) {
+      var name = c.MainDescription||c.Description;
+      var area = c.AreaDescription ? ', ' + c.AreaDescription + ' обл.' : '';
+      return '<div class="ac-item" tabindex="0" data-ref="' + (c.DeliveryCity||c.Ref) + '" data-name="' + name + '"><strong>' + name + '</strong><span style="opacity:.5;font-size:12px">' + area + '</span></div>';
+    }).join('');
+    list.querySelectorAll('.ac-item').forEach(function(el) {
+      el.addEventListener('click', function() {
+        selectedCity = {ref:el.dataset.ref, name:el.dataset.name};
+        document.getElementById('npCity').value = el.dataset.name;
+        closeAC('npCityList');
+        document.getElementById('npBranchWrap').style.display = '';
+        document.getElementById('npBranch').focus();
+        npBranch('');
+      });
+    });
+  } catch(e) { list.innerHTML='<div class="ac-hint">Помилка — введіть вручну</div>'; }
+}
+
+async function npBranch(q) {
+  if (!selectedCity) return;
+  var list = document.getElementById('npBranchList');
+  list.innerHTML = '<div class="ac-hint">Завантаження відділень...</div>'; list.classList.add('open');
+  try {
+    var r = await fetch('/api/novaposhta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'searchBranch',cityRef:selectedCity.ref,query:q})});
+    var d = await r.json();
+    var branches = (d.data||[]).slice(0,12);
+    if (!branches.length) { list.innerHTML='<div class="ac-hint">Відділення не знайдено</div>'; return; }
+    list.innerHTML = branches.map(function(b){ return '<div class="ac-item" tabindex="0" data-ref="' + b.Ref + '" data-name="' + b.Description + '">' + b.Description + '</div>'; }).join('');
+    list.querySelectorAll('.ac-item').forEach(function(el) {
+      el.addEventListener('click', function() {
+        selectedBranch = {ref:el.dataset.ref, name:el.dataset.name};
+        document.getElementById('npBranch').value = el.dataset.name;
+        closeAC('npBranchList');
+      });
+    });
+  } catch(e) { list.innerHTML='<div class="ac-hint">Помилка — введіть вручну</div>'; }
+}
+
+function closeAC(id) { document.getElementById(id).classList.remove('open'); }
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.ac-wrap')) document.querySelectorAll('.ac-list').forEach(function(l){ l.classList.remove('open'); });
+});
+
+function selectPay(el) {
+  document.querySelectorAll('.pay-method').forEach(function(p){ p.classList.remove('active'); });
+  el.classList.add('active');
+  el.querySelector('input[type=radio]').checked = true;
+}
+
+function fErr(id, show) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.classList[show?'add':'remove']('err');
+  var msg = el.nextElementSibling;
+  if (msg && msg.classList.contains('err-msg')) msg.style.display = show?'block':'none';
+}
+function showErr(id, show) {
+  var el = document.getElementById(id);
+  if (el) el.style.display = show?'block':'none';
+}
+
+function validate() {
+  var ok = true;
+  var fn = document.getElementById('firstName').value.trim();
+  var ln = document.getElementById('lastName').value.trim();
+  var ph = document.getElementById('phone').value.replace(/[\s\-\(\)]/g,'');
+  var em = document.getElementById('email').value.trim();
+  fErr('firstName', !fn); if (!fn) ok=false;
+  fErr('lastName', !ln); if (!ln) ok=false;
+  var validPh = /^(\+?380|0)\d{9}$/.test(ph);
+  fErr('phone', !validPh); if (!validPh) ok=false;
+  var pn = document.getElementById('petName').value.trim();
+  fErr('petName', !pn); if (!pn) ok=false;
+  var validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em);
+  fErr('email', !validEmail); if (!validEmail) ok=false;
+  if (deliveryType==='np') {
+    var cv = document.getElementById('npCity').value.trim();
+    showErr('npCityErr', !cv); if (!cv) ok=false;
+    var bw = document.getElementById('npBranchWrap').style.display !== 'none';
+    var bv = document.getElementById('npBranch').value.trim();
+    if (bw) { showErr('npBranchErr', !bv); if (!bv) ok=false; }
+  }
+  return ok;
+}
+
+async function submitOrder() {
+  document.getElementById('submitError').classList.remove('show');
+  if (!validate() || !cartItems.length) return;
+
+  var btn = document.getElementById('btnCheckout');
+  btn.classList.add('loading'); btn.disabled = true;
+
+  var payMethod = (document.querySelector('input[name=payment]:checked') || {}).value || 'applegoogle';
+  var deliveryAddress = '';
+  if (deliveryType==='np') {
+    deliveryAddress = 'Нова Пошта: ' + document.getElementById('npCity').value;
+    var br = document.getElementById('npBranch').value;
+    if (br) deliveryAddress += ', ' + br;
+  } else {
+    deliveryAddress = 'Укрпошта: ' + [document.getElementById('upCity').value, document.getElementById('upAddress').value].filter(Boolean).join(', ');
+  }
+
+  var payload = {
+    firstName: document.getElementById('firstName').value.trim(),
+    lastName: document.getElementById('lastName').value.trim(),
+    phone: document.getElementById('phone').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    petName: document.getElementById('petName').value.trim(),
+    deliveryType: deliveryType,
+    deliveryAddress: deliveryAddress,
+    cityRef: selectedCity ? selectedCity.ref : null,
+    branchRef: selectedBranch ? selectedBranch.ref : null,
+    comment: document.getElementById('comment').value.trim(),
+    payMethod: payMethod,
+    items: cartItems
+  };
+
+  try {
+    var orderRes = await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    var orderData = await orderRes.json();
+    if (!orderRes.ok) throw new Error(orderData.error||'Помилка створення замовлення');
+
+    var total = cartItems.reduce(function(s,i){ return s+(i.price||0)*(i.qty||1); }, 0);
+    var payRes = await fetch('/api/payment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:orderData.order&&orderData.order.id, amount:total, items:cartItems})});
+    var payData = await payRes.json();
+    if (!payRes.ok) throw new Error(payData.error||'Помилка платіжної системи');
+    sessionStorage.removeItem('marcelCart');
+    window.location.href = payData.pageUrl;
+  } catch(e) {
+    btn.classList.remove('loading'); btn.disabled = false;
+    var errEl = document.getElementById('submitError');
+    errEl.textContent = '⚠️ ' + e.message + '. Спробуйте ще раз або напишіть нам.';
+    errEl.classList.add('show');
+  }
+}
+
+function showSuccess(name) {
+  document.getElementById('coLayout').innerHTML =
+    '<div class="success-wrap">'
+    + '<div class="success-icon">🎉</div>'
+    + '<h2 class="success-title">Дякуємо, ' + (name||'') + '!</h2>'
+    + '<p class="success-sub">Ваше замовлення прийнято. Ми вже готуємо посилку для вашого улюбленця.</p>'
+    + '<a href="/" class="btn-back">Повернутись до каталогу</a>'
+    + '</div>';
+}
+
+loadCart();
+</script>
+</body>
+</html>
