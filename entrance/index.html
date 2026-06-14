@@ -601,5 +601,34 @@ placeholder="+38(0__) ___-__-__" aria-describedby="phone-note" />
   });
 })();
 </script>
+   <script>
+(function(){
+  document.addEventListener('DOMContentLoaded',function(){
+    var dco=document.getElementById('dco');
+    if(!dco)return;
+    dco.addEventListener('click',function(e){
+      e.stopImmediatePropagation();
+      e.preventDefault();
+      var items=[];
+      document.querySelectorAll('#ditems .di').forEach(function(el){
+        var name=(el.querySelector('.nm')||{}).textContent||'';
+        name=name.trim();
+        var wt=(el.querySelector('.wt')||{}).textContent||'';
+        wt=wt.trim();
+        var qtyEl=el.querySelector('.qty span')||el.querySelector('.qty');
+        var qty=parseInt((qtyEl||{}).textContent)||1;
+        var m=wt.match(/(\d+)\s*\u0433\u0440\s*[\u00B7\u2022]\s*(\d+)/);
+        var weight=m?parseInt(m[1]):0;
+        var price=m?parseInt(m[2]):0;
+        var img=el.querySelector('img.t');
+        if(name)items.push({name:name,weight:weight,price:price,qty:qty,img:img?img.src:'',id:el.dataset.k||''});
+      });
+      if(!items.length)return;
+      sessionStorage.setItem('marcelCart',JSON.stringify(items));
+      window.location.href='/checkout.html';
+    },true);
+  });
+})();
+</script>
 </body>
 </html>
