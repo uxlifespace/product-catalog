@@ -11,10 +11,10 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'phone and items are required' });
   }
 
-  const headers = {
+  const headers =
     Authorization: `Bearer ${process.env.KEYCRM_API_KEY}`,
     'Content-Type': 'application/json',
-  };h
+  };
 
   const fullName = [firstName, lastName].filter(Boolean).join(' ') || 'Замовлення з сайту';
 
