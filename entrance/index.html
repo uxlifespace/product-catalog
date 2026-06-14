@@ -564,7 +564,7 @@ placeholder="+38(0__) ___-__-__" aria-describedby="phone-note" />
   });
 
   /* Form submit */
-  document.querySelector('.phone-row').addEventListener('submit', function (e) {
+  document.querySelector('.phone-row').addEventListener('submit', async function (e) {
     e.preventDefault();
     var digits = rest(input.value);
     if (digits.length < 9) {
@@ -577,8 +577,26 @@ placeholder="+38(0__) ___-__-__" aria-describedby="phone-note" />
       showError('Невідомий код оператора — перевірте номер');
       return;
     }
-    clearError();
-    input.value = '';
+   try {
+    const resp = await fetch('/api/lead', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            phone: digits
+        })
+    });
+
+    if (!resp.ok) {
+        throw new Error('Помилка відправки');
+    }
+} catch (err) {
+    console.error(err);
+    showError('Помилка відправки заявки');
+    return;
+}
+    imaskInput.value = '';
     showPopup();
   });
 })();
