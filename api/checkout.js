@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   const headers = {
     Authorization: `Bearer ${process.env.KEYCRM_API_KEY}`,
     'Content-Type': 'application/json',
-  };
+  };h
 
   const fullName = [firstName, lastName].filter(Boolean).join(' ') || 'Замовлення з сайту';
 
@@ -24,7 +24,7 @@ export default async function handler(req, res) {
       full_name: fullName,
       phone: [phone],
     };
-    if (email) buyerPayload.email = email;
+    if (email) buyerPayload.email = [email];
 
     const buyerRes = await fetch('https://openapi.keycrm.app/v1/buyer', {
       method: 'POST',
