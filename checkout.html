@@ -545,12 +545,8 @@ async function submitOrder() {
     var orderData = await orderRes.json();
     if (!orderRes.ok) throw new Error(orderData.error||'Помилка створення замовлення');
 
-    var total = cartItems.reduce(function(s,i){ return s+(i.price||0)*(i.qty||1); }, 0);
-    var payRes = await fetch('/api/payment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:orderData.order&&orderData.order.id, amount:total, items:cartItems})});
-    var payData = await payRes.json();
-    if (!payRes.ok) throw new Error(payData.error||'Помилка платіжної системи');
     sessionStorage.removeItem('marcelCart');
-    window.location.href = payData.pageUrl;
+    showSuccess(payload.firstName);
   } catch(e) {
     btn.classList.remove('loading'); btn.disabled = false;
     var errEl = document.getElementById('submitError');
