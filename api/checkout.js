@@ -9,7 +9,7 @@ module.exports = async function handler(req, res) {
 
   if (!phone || !items?.length) {
     return res.status(400).json({ error: 'phone and items are required' });
-  }h
+  }
 
   const headers = {
     Authorization: `Bearer ${process.env.KEYCRM_API_KEY}`,
