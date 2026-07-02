@@ -4,7 +4,7 @@ const NP_KEY = process.env.NOVAPOSHTA_API_KEY || '';
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { action, query, cityRef } = req.body || {};
+  const { action, query, cityRef, category } = req.body || {};
 
   try {
     if (action === 'searchCity') {
@@ -30,17 +30,20 @@ module.exports = async function handler(req, res) {
     }
 
     if (action === 'searchBranch') {
+      const methodProperties = {
+        CityRef: cityRef || '',
+        FindByString: query || '',
+        Limit: 100,
+        Page: 1,
+        Language: 'UA',
+      };
+      // category: 'Branch' (відділення) або 'Postomat' (поштомат) — фільтр на рівні NP API
+      if (category) methodProperties.CategoryOfWarehouse = category === 'Postomat' ? 'Postomat' : 'Branch';
       const payload = {
         apiKey: NP_KEY,
         modelName: 'AddressGeneral',
         calledMethod: 'getWarehouses',
-        methodProperties: {
-          CityRef: cityRef || '',
-          FindByString: query || '',
-          Limit:50,
-          Page: 1,
-          Language: 'UA',
-        },
+        methodProperties,
       };
       const r = await fetch(NP_API, {
         method: 'POST',

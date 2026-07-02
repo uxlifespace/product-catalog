@@ -3,7 +3,8 @@ module.exports = async function handler(req, res) {
 
   const {
     firstName, lastName, phone, email,
-    petName, deliveryType, deliveryAddress,
+    petName, deliveryMethod, deliveryAddress,
+    cityName, branchRef, street, house, apartment,
     comment, payMethod, items
   } = req.body || {};
 
@@ -19,12 +20,13 @@ module.exports = async function handler(req, res) {
   const fullName = [firstName, lastName].filter(Boolean).join(' ') || 'Замовлення з сайту';
 
   try {
-    // 1. Create buyer
+    // 1. Create buyer (кличка → структурне поле CT_1001, не в текст)
     const buyerPayload = {
       full_name: fullName,
       phone: [phone],
     };
     if (email) buyerPayload.email = [email];
+    if (petName) buyerPayload.custom_fields = [{ uuid: 'CT_1001', value: petName }];
 
     const buyerRes = await fetch('https://openapi.keycrm.app/v1/buyer', {
       method: 'POST',
@@ -34,10 +36,8 @@ module.exports = async function handler(req, res) {
     const buyer = await buyerRes.json();
     if (!buyerRes.ok) return res.status(502).json({ error: 'KeyCRM buyer error', details: buyer });
 
-    // 2. Build order comment
+    // 2. Comment лишається тільки для оплати й довільного коментаря клієнта
     const commentParts = [];
-    if (petName) commentParts.push(`Кличка: ${petName}`);
-    if (deliveryAddress) commentParts.push(`Доставка: ${deliveryAddress}`);
     if (payMethod) commentParts.push(`Оплата: ${payMethod === 'cod' ? 'Накладений платіж' : payMethod === 'applegoogle' ? 'Apple/Google Pay' : 'Картка онлайн'}`);
     if (comment) commentParts.push(`Коментар: ${comment}`);
     const buyerComment = commentParts.join('\n');
@@ -50,12 +50,28 @@ module.exports = async function handler(req, res) {
       unit_type: 'шт',
     }));
 
-    // 4. Create order
+    // 4. Shipping — структуроване поле замість тексту. Завжди Нова Пошта (Укрпошту прибрано).
+    const shipping = { shipping_service: 'Нова Пошта' };
+    if (cityName) shipping.shipping_address_city = cityName;
+    if (fullName) shipping.recipient_full_name = fullName;
+    if (phone) shipping.recipient_phone = phone;
+
+    if (deliveryMethod === 'courier') {
+      const line2 = [street, house].filter(Boolean).join(', ') + (apartment ? `, кв./оф. ${apartment}` : '');
+      if (line2) shipping.shipping_secondary_line = line2;
+    } else {
+      // branch / postomat — branchRef це реальний Nova Poshta warehouse Ref, який форма вже рахує
+      if (branchRef) shipping.warehouse_ref = branchRef;
+      if (deliveryAddress) shipping.shipping_receive_point = deliveryAddress;
+    }
+
+    // 5. Create order
     const orderPayload = {
       source_name: 'Сайт',
       buyer: { id: buyer.id },
       buyer_comment: buyerComment,
       products,
+      shipping,
     };
 
     const orderRes = await fetch('https://openapi.keycrm.app/v1/order', {
