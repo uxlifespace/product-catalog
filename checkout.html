@@ -499,6 +499,14 @@ document.getElementById('npStreet').addEventListener('focus', function() {
   if (val.length >= 2 && !document.getElementById('npStreetList').classList.contains('open')) npStreet(val);
 });
 
+// NP descriptions frequently contain literal double quotes (e.g. Поштомат "Нова Пошта" №25874: ...).
+// Interpolating them unescaped into an HTML attribute breaks the tag and truncates the value at the
+// first embedded quote — that's what caused the input to show only "Поштомат" after selection.
+// Escape everything we inject into these autocomplete list items, both in attributes and text.
+function escAttr(s) {
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
 async function npCity(q) {
   var list = document.getElementById('npCityList');
   list.innerHTML = '<div class="ac-hint">Пошук...</div>'; list.classList.add('open');
@@ -512,7 +520,7 @@ async function npCity(q) {
       var full = c.Present || c.MainDescription || c.Description || '';
       var short = c.MainDescription || c.Description || full;
       var rest = full.indexOf(short) === 0 ? full.slice(short.length).replace(/^,\s*/, '') : full;
-      return '<div class="ac-item" tabindex="0" data-ref="' + (c.DeliveryCity||c.Ref) + '" data-settlement-ref="' + (c.Ref||'') + '" data-name="' + short + '" data-full="' + full + '"><strong>' + short + '</strong>' + (rest ? '<span style="opacity:.5;font-size:12px"> — ' + rest + '</span>' : '') + '</div>';
+      return '<div class="ac-item" tabindex="0" data-ref="' + escAttr(c.DeliveryCity||c.Ref) + '" data-settlement-ref="' + escAttr(c.Ref||'') + '" data-name="' + escAttr(short) + '" data-full="' + escAttr(full) + '"><strong>' + escAttr(short) + '</strong>' + (rest ? '<span style="opacity:.5;font-size:12px"> — ' + escAttr(rest) + '</span>' : '') + '</div>';
     }).join('');
     list.querySelectorAll('.ac-item').forEach(function(el) {
       el.addEventListener('click', function() {
@@ -553,7 +561,7 @@ async function npWarehouse(q, listId, inputId, category) {
       if (attempt < 2) await new Promise(function(res){ setTimeout(res, 500); });
     }
     if (!branches.length) { list.innerHTML='<div class="ac-hint">Нічого не знайдено</div>'; return; }
-    list.innerHTML = branches.map(function(b){ return '<div class="ac-item" tabindex="0" data-ref="' + b.Ref + '" data-name="' + b.Description + '">' + b.Description + '</div>'; }).join('');
+    list.innerHTML = branches.map(function(b){ var d = escAttr(b.Description); return '<div class="ac-item" tabindex="0" data-ref="' + escAttr(b.Ref) + '" data-name="' + d + '">' + d + '</div>'; }).join('');
     list.querySelectorAll('.ac-item').forEach(function(el) {
       el.addEventListener('click', function() {
         selectedBranch = {ref:el.dataset.ref, name:el.dataset.name};
@@ -575,7 +583,8 @@ async function npStreet(q) {
     if (!streets.length) { list.innerHTML='<div class="ac-hint">Нічого не знайдено</div>'; return; }
     list.innerHTML = streets.map(function(s){
       var name = s.Present || s.SettlementStreetDescription || s.StreetsTypeDescription && (s.StreetsTypeDescription + ' ' + s.SettlementStreetDescription) || s.Description || '';
-      return '<div class="ac-item" tabindex="0" data-name="' + name + '">' + name + '</div>';
+      var n = escAttr(name);
+      return '<div class="ac-item" tabindex="0" data-name="' + n + '">' + n + '</div>';
     }).join('');
     list.querySelectorAll('.ac-item').forEach(function(el) {
       el.addEventListener('click', function() {
