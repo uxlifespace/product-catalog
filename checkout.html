@@ -263,7 +263,7 @@ img{display:block;max-width:100%}button{font-family:inherit;cursor:pointer}a{col
         </div>
         <div class="field">
           <label for="phone">Номер телефону</label>
-          <input type="tel" id="phone" placeholder="+380XXXXXXXXX" autocomplete="tel" />
+          <input type="tel" id="phone" placeholder="+380XXXXXXXXX" autocomplete="tel" value="+380" maxlength="13" inputmode="numeric" />
           <span class="err-msg">Вкажіть коректний номер</span>
         </div>
         <div class="field">
@@ -438,10 +438,13 @@ function setNpMethod(method, el) {
   document.getElementById('npBranchWrap').style.display = 'none';
   document.getElementById('npPostomatWrap').style.display = 'none';
   document.getElementById('npCourierWrap').style.display = 'none';
-  // Re-reveal the relevant sub-field if a city is already chosen
+  // Re-reveal the relevant sub-field if a city is already chosen.
+  // The reveal + dropdown-open is deferred to the next tick because the tab
+  // button click also bubbles to the document-level "click outside .ac-wrap"
+  // handler below, which would otherwise close the list we just opened.
   if (selectedCity) {
-    if (method === 'branch') { document.getElementById('npBranchWrap').style.display = ''; npBranch(''); }
-    else if (method === 'postomat') { document.getElementById('npPostomatWrap').style.display = ''; npPostomat(''); }
+    if (method === 'branch') { document.getElementById('npBranchWrap').style.display = ''; setTimeout(function(){ npBranch(''); }, 0); }
+    else if (method === 'postomat') { document.getElementById('npPostomatWrap').style.display = ''; setTimeout(function(){ npPostomat(''); }, 0); }
     else if (method === 'courier') { document.getElementById('npCourierWrap').style.display = ''; }
   }
 }
@@ -467,12 +470,20 @@ document.getElementById('npBranch').addEventListener('input', function() {
   var val = this.value.trim();
   branchTimer = setTimeout(function(){ npBranch(val); }, 400);
 });
+document.getElementById('npBranch').addEventListener('focus', function() {
+  if (!selectedCity) return;
+  if (!document.getElementById('npBranchList').classList.contains('open')) npBranch(this.value.trim());
+});
 
 document.getElementById('npPostomat').addEventListener('input', function() {
   clearTimeout(branchTimer);
   if (!selectedCity) return;
   var val = this.value.trim();
   branchTimer = setTimeout(function(){ npPostomat(val); }, 400);
+});
+document.getElementById('npPostomat').addEventListener('focus', function() {
+  if (!selectedCity) return;
+  if (!document.getElementById('npPostomatList').classList.contains('open')) npPostomat(this.value.trim());
 });
 
 document.getElementById('npStreet').addEventListener('input', function() {
@@ -481,6 +492,11 @@ document.getElementById('npStreet').addEventListener('input', function() {
   var val = this.value.trim();
   if (val.length < 2) { closeAC('npStreetList'); return; }
   branchTimer = setTimeout(function(){ npStreet(val); }, 400);
+});
+document.getElementById('npStreet').addEventListener('focus', function() {
+  if (!selectedCity) return;
+  var val = this.value.trim();
+  if (val.length >= 2 && !document.getElementById('npStreetList').classList.contains('open')) npStreet(val);
 });
 
 async function npCity(q) {
@@ -561,6 +577,48 @@ function closeAC(id) { document.getElementById(id).classList.remove('open'); }
 document.addEventListener('click', function(e) {
   if (!e.target.closest('.ac-wrap')) document.querySelectorAll('.ac-list').forEach(function(l){ l.classList.remove('open'); });
 });
+
+// --- Phone mask: "+380" is a fixed, non-editable prefix; typing/pasting only
+// ever affects the 9 digits after it, and the caret can never move into the
+// prefix itself.
+(function() {
+  var PHONE_PREFIX = '+380';
+  var phoneEl = document.getElementById('phone');
+  if (!phoneEl) return;
+
+  function digitsAfterPrefix(raw) {
+    var digits = raw.replace(/\D/g, '');
+    if (digits.indexOf('380') === 0) digits = digits.slice(3);
+    else if (digits.indexOf('0') === 0) digits = digits.slice(1);
+    return digits.slice(0, 9);
+  }
+
+  function caretAfterPrefix() {
+    var pos = Math.max(phoneEl.value.length, PHONE_PREFIX.length);
+    phoneEl.setSelectionRange(pos, pos);
+  }
+
+  phoneEl.addEventListener('focus', function() {
+    if (!this.value) this.value = PHONE_PREFIX;
+    caretAfterPrefix();
+  });
+
+  phoneEl.addEventListener('click', function() {
+    if (this.selectionStart < PHONE_PREFIX.length) caretAfterPrefix();
+  });
+
+  phoneEl.addEventListener('keydown', function(e) {
+    var start = this.selectionStart, end = this.selectionEnd;
+    if ((e.key === 'Backspace' || e.key === 'Delete') && start <= PHONE_PREFIX.length && end <= PHONE_PREFIX.length) {
+      e.preventDefault();
+    }
+  });
+
+  phoneEl.addEventListener('input', function() {
+    this.value = PHONE_PREFIX + digitsAfterPrefix(this.value);
+    caretAfterPrefix();
+  });
+})();
 
 function selectPay(el) {
   document.querySelectorAll('.pay-method').forEach(function(p){ p.classList.remove('active'); });
