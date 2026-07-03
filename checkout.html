@@ -530,14 +530,28 @@ async function npCity(q) {
 async function npBranch(q) { return npWarehouse(q, 'npBranchList', 'npBranch', 'Branch'); }
 async function npPostomat(q) { return npWarehouse(q, 'npPostomatList', 'npPostomat', 'Postomat'); }
 
+async function npWarehouseFetch(q, category) {
+  var r = await fetch('/api/novaposhta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'searchBranch',cityRef:selectedCity.ref,query:q,category:category})});
+  var d = await r.json();
+  return d.data || [];
+}
+
 async function npWarehouse(q, listId, inputId, category) {
   if (!selectedCity) return;
   var list = document.getElementById(listId);
+  var myToken = (list.dataset.reqToken = String(Date.now() + Math.random()));
   list.innerHTML = '<div class="ac-hint">Завантаження...</div>'; list.classList.add('open');
   try {
-    var r = await fetch('/api/novaposhta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'searchBranch',cityRef:selectedCity.ref,query:q,category:category})});
-    var d = await r.json();
-    var branches = d.data||[];
+    // NP's own API occasionally answers an otherwise-valid request with an empty page
+    // (their rate limiting, not ours) — retry a couple of times client-side, on top of
+    // the retries already happening server-side, before telling the user "not found".
+    var branches = [];
+    for (var attempt = 0; attempt < 3; attempt++) {
+      branches = await npWarehouseFetch(q, category);
+      if (list.dataset.reqToken !== myToken) return; // a newer request superseded this one
+      if (branches.length) break;
+      if (attempt < 2) await new Promise(function(res){ setTimeout(res, 500); });
+    }
     if (!branches.length) { list.innerHTML='<div class="ac-hint">Нічого не знайдено</div>'; return; }
     list.innerHTML = branches.map(function(b){ return '<div class="ac-item" tabindex="0" data-ref="' + b.Ref + '" data-name="' + b.Description + '">' + b.Description + '</div>'; }).join('');
     list.querySelectorAll('.ac-item').forEach(function(el) {
