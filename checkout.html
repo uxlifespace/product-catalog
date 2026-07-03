@@ -33,7 +33,7 @@ img{display:block;max-width:100%}button{font-family:inherit;cursor:pointer}a{col
 .hdr__spacer{justify-self:end}
 
 /* PAGE TITLE */
-.page-title{font-family:var(--disp);font-size:40px;font-weight:400;color:var(--green);margin:40px 0 32px;letter-spacing:-.5px;line-height:1.1}
+.page-title{font-family:var(--disp);font-size:40px;font-weight:400;color:var(--main);margin:40px 0 32px;letter-spacing:-.5px;line-height:1.1}
 
 /* LAYOUT */
 .co{display:grid;grid-template-columns:1fr 420px;gap:40px;padding-bottom:80px;align-items:start}
@@ -94,6 +94,17 @@ img{display:block;max-width:100%}button{font-family:inherit;cursor:pointer}a{col
 .pay-name{font-size:14px;font-weight:600;color:var(--green)}
 .pay-desc{font-size:12px;color:var(--green);opacity:.5;margin-top:2px}
 .pay-logos{display:flex;gap:5px;align-items:center;flex-shrink:0}
+
+/* CALL-BEFORE-DELIVERY TOGGLE */
+.call-toggle{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:14px}
+.call-toggle__label{font-size:14px;font-weight:600;color:var(--green)}
+.call-toggle__sub{font-size:12px;color:var(--green);opacity:.5;margin-top:2px}
+.switch{position:relative;display:inline-block;width:44px;height:26px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.switch__track{position:absolute;cursor:pointer;inset:0;background:rgba(63,72,24,.2);border-radius:999px;transition:background .2s}
+.switch__track:before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.switch input:checked + .switch__track{background:var(--main)}
+.switch input:checked + .switch__track:before{transform:translateX(18px)}
 
 /* SIDEBAR */
 .sidebar{position:sticky;top:100px}
@@ -215,7 +226,10 @@ img{display:block;max-width:100%}button{font-family:inherit;cursor:pointer}a{col
             <div class="row2">
               <div class="field">
                 <label for="npStreet">Вулиця</label>
-                <input type="text" id="npStreet" placeholder="Вулиця" autocomplete="off" />
+                <div class="ac-wrap">
+                  <input type="text" id="npStreet" placeholder="Введіть назву вулиці..." autocomplete="off" />
+                  <div class="ac-list" id="npStreetList"></div>
+                </div>
                 <span id="npStreetErr" style="font-size:12px;color:#c0392b;display:none">Вкажіть вулицю</span>
               </div>
               <div class="field">
@@ -328,6 +342,16 @@ img{display:block;max-width:100%}button{font-family:inherit;cursor:pointer}a{col
         <h2 class="sec__h">Коментар <span class="opt-tag">необов'язково</span></h2>
         <div class="field">
           <textarea id="comment" placeholder="Уточнення до замовлення, побажання щодо часу відправки або упаковки..."></textarea>
+        </div>
+        <div class="call-toggle">
+          <div>
+            <div class="call-toggle__label">Подзвонити перед відправкою</div>
+            <div class="call-toggle__sub">Зателефонуємо, щоб узгодити деталі перед відправкою замовлення</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="callBeforeDelivery" />
+            <span class="switch__track"></span>
+          </label>
         </div>
       </div>
 
@@ -451,6 +475,14 @@ document.getElementById('npPostomat').addEventListener('input', function() {
   branchTimer = setTimeout(function(){ npPostomat(val); }, 400);
 });
 
+document.getElementById('npStreet').addEventListener('input', function() {
+  clearTimeout(branchTimer);
+  if (!selectedCity) return;
+  var val = this.value.trim();
+  if (val.length < 2) { closeAC('npStreetList'); return; }
+  branchTimer = setTimeout(function(){ npStreet(val); }, 400);
+});
+
 async function npCity(q) {
   var list = document.getElementById('npCityList');
   list.innerHTML = '<div class="ac-hint">Пошук...</div>'; list.classList.add('open');
@@ -464,11 +496,11 @@ async function npCity(q) {
       var full = c.Present || c.MainDescription || c.Description || '';
       var short = c.MainDescription || c.Description || full;
       var rest = full.indexOf(short) === 0 ? full.slice(short.length).replace(/^,\s*/, '') : full;
-      return '<div class="ac-item" tabindex="0" data-ref="' + (c.DeliveryCity||c.Ref) + '" data-name="' + short + '" data-full="' + full + '"><strong>' + short + '</strong>' + (rest ? '<span style="opacity:.5;font-size:12px"> — ' + rest + '</span>' : '') + '</div>';
+      return '<div class="ac-item" tabindex="0" data-ref="' + (c.DeliveryCity||c.Ref) + '" data-settlement-ref="' + (c.Ref||'') + '" data-name="' + short + '" data-full="' + full + '"><strong>' + short + '</strong>' + (rest ? '<span style="opacity:.5;font-size:12px"> — ' + rest + '</span>' : '') + '</div>';
     }).join('');
     list.querySelectorAll('.ac-item').forEach(function(el) {
       el.addEventListener('click', function() {
-        selectedCity = {ref:el.dataset.ref, name:el.dataset.name, full:el.dataset.full};
+        selectedCity = {ref:el.dataset.ref, settlementRef:el.dataset.settlementRef, name:el.dataset.name, full:el.dataset.full};
         document.getElementById('npCity').value = el.dataset.full || el.dataset.name;
         closeAC('npCityList');
         if (npMethod === 'branch') { document.getElementById('npBranchWrap').style.display = ''; document.getElementById('npBranch').focus(); npBranch(''); }
@@ -497,6 +529,29 @@ async function npWarehouse(q, listId, inputId, category) {
         selectedBranch = {ref:el.dataset.ref, name:el.dataset.name};
         document.getElementById(inputId).value = el.dataset.name;
         closeAC(listId);
+      });
+    });
+  } catch(e) { list.innerHTML='<div class="ac-hint">Помилка — введіть вручну</div>'; }
+}
+
+async function npStreet(q) {
+  if (!selectedCity) return;
+  var list = document.getElementById('npStreetList');
+  list.innerHTML = '<div class="ac-hint">Пошук...</div>'; list.classList.add('open');
+  try {
+    var r = await fetch('/api/novaposhta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'searchStreet',settlementRef:selectedCity.settlementRef,query:q})});
+    var d = await r.json();
+    var streets = d.data||[];
+    if (!streets.length) { list.innerHTML='<div class="ac-hint">Нічого не знайдено</div>'; return; }
+    list.innerHTML = streets.map(function(s){
+      var name = s.Present || s.SettlementStreetDescription || s.StreetsTypeDescription && (s.StreetsTypeDescription + ' ' + s.SettlementStreetDescription) || s.Description || '';
+      return '<div class="ac-item" tabindex="0" data-name="' + name + '">' + name + '</div>';
+    }).join('');
+    list.querySelectorAll('.ac-item').forEach(function(el) {
+      el.addEventListener('click', function() {
+        document.getElementById('npStreet').value = el.dataset.name;
+        closeAC('npStreetList');
+        document.getElementById('npHouse').focus();
       });
     });
   } catch(e) { list.innerHTML='<div class="ac-hint">Помилка — введіть вручну</div>'; }
@@ -595,6 +650,7 @@ async function submitOrder() {
     house: npMethod === 'courier' ? document.getElementById('npHouse').value.trim() : null,
     apartment: npMethod === 'courier' ? document.getElementById('npApt').value.trim() : null,
     comment: document.getElementById('comment').value.trim(),
+    callBeforeDelivery: document.getElementById('callBeforeDelivery').checked,
     payMethod: payMethod,
     items: cartItems
   };

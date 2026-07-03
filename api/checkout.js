@@ -5,7 +5,7 @@ module.exports = async function handler(req, res) {
     firstName, lastName, phone, email,
     petName, deliveryMethod, deliveryAddress,
     cityName, branchRef, street, house, apartment,
-    comment, payMethod, items
+    comment, callBeforeDelivery, payMethod, items
   } = req.body || {};
 
   if (!phone || !items?.length) {
@@ -39,6 +39,7 @@ module.exports = async function handler(req, res) {
     // 2. Comment лишається тільки для оплати й довільного коментаря клієнта
     const commentParts = [];
     if (payMethod) commentParts.push(`Оплата: ${payMethod === 'cod' ? 'Накладений платіж' : payMethod === 'applegoogle' ? 'Apple/Google Pay' : 'Картка онлайн'}`);
+    if (callBeforeDelivery) commentParts.push('Подзвонити перед відправкою: так');
     if (comment) commentParts.push(`Коментар: ${comment}`);
     const buyerComment = commentParts.join('\n');
 
