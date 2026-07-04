@@ -1,6 +1,6 @@
 // Оформлення замовлення: спочатку ЗАВЖДИ пишемо в Supabase (джерело правди),
 // і лише потім намагаємось синхронізувати з KeyCRM. Якщо KeyCRM недоступний —
-// замовлення клієнта все одно збережено, помилка синхронізації логується для cron-повтору.
+// замовлення клієнта все одно збережено, помилка синхронізації логується для крон-повтору.
 const { getSupabase } = require('../lib/supabase');
 const { getSessionUser } = require('../lib/session');
 const { syncOrderToKeyCRM } = require('../lib/keycrm');
@@ -11,6 +11,12 @@ function parseCartItemId(id) {
   const idx = s.lastIndexOf('_');
   if (idx === -1) return { productId: s, weight: null };
   return { productId: s.slice(0, idx), weight: s.slice(idx + 1) };
+}
+
+// Безпечно перетворює значення на ціле число (або null, якщо не вийшло)
+function toIntOrNull(value) {
+  const n = parseInt(value, 10);
+  return Number.isFinite(n) ? n : null;
 }
 
 module.exports = async function handler(req, res) {
@@ -37,8 +43,6 @@ module.exports = async function handler(req, res) {
   };
 
   const supabase = getSupabase();
-
-  // Якщо користувач залогінений — знаходимо його запис (для user_id і вже відомого keycrm_buyer_id)
   const session = await getSessionUser(req);
   let dbUser = null;
   if (session) {
@@ -46,7 +50,6 @@ module.exports = async function handler(req, res) {
     dbUser = data || null;
   }
 
-  // КРОК 1: пишемо замовлення в Supabase. Якщо це не вдалося — переривyємо чекаут з помилкою.
   let order;
   try {
     const { data: insertedOrder, error: orderErr } = await supabase
@@ -56,7 +59,7 @@ module.exports = async function handler(req, res) {
         status: 'new',
         total_amount: totalAmount,
         currency: 'UAH',
-        pay_method: payMethod,
+        payment_method: payMethod,
         comment: comment || null,
         contact_snapshot: contactSnapshot,
         delivery_snapshot: deliverySnapshot,
@@ -68,23 +71,23 @@ module.exports = async function handler(req, res) {
     if (orderErr) throw orderErr;
     order = insertedOrder;
 
+    // Реальні назви колонок у order_items: product_name, weight (int), unit_price, quantity, image_url
     const orderItemsPayload = items.map((item) => {
       const parsed = parseCartItemId(item.id);
       return {
         order_id: order.id,
-        product_id: parsed.productId,
-        name: item.name,
-        weight: item.weight != null ? String(item.weight) : parsed.weight,
-        qty: item.qty || 1,
-        price: item.price || 0,
-        img: item.img || null,
+        product_id: toIntOrNull(parsed.productId),
+        product_name: item.name,
+        weight: toIntOrNull(item.weight != null ? item.weight : parsed.weight),
+        quantity: item.qty || 1,
+        unit_price: item.price || 0,
+        image_url: item.img || null,
       };
     });
 
     const { error: itemsErr } = await supabase.from('order_items').insert(orderItemsPayload);
     if (itemsErr) throw itemsErr;
 
-    // Оновлюємо/створюємо профіль чекауту користувача — для автозаповнення наступного разу.
     if (dbUser) {
       await supabase.from('user_checkout_profile').upsert(
         {
@@ -113,37 +116,25 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'Не вдалося зберегти замовлення', details: String(e.message || e) });
   }
 
-  // КРОК 2: намагаємось синхронізувати з KeyCRM. Помилка тут НЕ повинна ламати чекаут клієнта.
   try {
     const orderItemsForSync = items.map((item) => ({ name: item.name, weight: item.weight, qty: item.qty, price: item.price }));
     const existingBuyerId = dbUser ? dbUser.keycrm_buyer_id : null;
-
     const syncResult = await syncOrderToKeyCRM(order, orderItemsForSync, existingBuyerId);
-
-    await supabase
-      .from('orders')
-      .update({
-        keycrm_buyer_id: syncResult.buyerId,
-        keycrm_order_id: syncResult.keycrmOrderId,
-        keycrm_sync_status: 'synced',
-        keycrm_sync_error: null,
-      })
-      .eq('id', order.id);
-
-    // Виправлення бага "дублікатів лідів": запам'ятовуємо buyer_id за користувачем назавжди.
+    await supabase.from('orders').update({
+      keycrm_buyer_id: syncResult.buyerId,
+      keycrm_order_id: syncResult.keycrmOrderId,
+      keycrm_sync_status: 'synced',
+      keycrm_sync_error: null,
+    }).eq('id', order.id);
     if (dbUser && !syncResult.buyerReused) {
       await supabase.from('users').update({ keycrm_buyer_id: syncResult.buyerId }).eq('id', dbUser.id);
     }
   } catch (syncErr) {
-    await supabase
-      .from('orders')
-      .update({
-        keycrm_sync_status: 'failed',
-        keycrm_sync_error: String(syncErr.message || syncErr),
-        keycrm_sync_attempts: 1,
-      })
-      .eq('id', order.id);
-    // Клієнту все одно відповідаємо успіхом — cron повторить синхронізацію пізніше.
+    await supabase.from('orders').update({
+      keycrm_sync_status: 'failed',
+      keycrm_sync_error: String(syncErr.message || syncErr),
+      keycrm_sync_attempts: 1,
+    }).eq('id', order.id);
   }
 
   return res.status(200).json({ orderId: order.id });

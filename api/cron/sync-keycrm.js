@@ -28,7 +28,14 @@ module.exports = async function handler(req, res) {
     const results = [];
 
     for (const order of orders || []) {
-      const items = order.order_items || [];
+      // Реальні колонки order_items: product_name, weight, unit_price, quantity, image_url.
+      // syncOrderToKeyCRM/createKeyCrmOrder очікують {name, weight, qty, price} — мапимо тут.
+      const items = (order.order_items || []).map((oi) => ({
+        name: oi.product_name,
+        weight: oi.weight,
+        qty: oi.quantity,
+        price: oi.unit_price,
+      }));
       const existingBuyerId = order.keycrm_buyer_id || order.users?.keycrm_buyer_id || null;
 
       try {
@@ -44,7 +51,7 @@ module.exports = async function handler(req, res) {
           })
           .eq('id', order.id);
 
-        if (!syncResult.buyerReused) {
+        if (!syncResult.buyerReused && order.user_id) {
           await supabase
             .from('users')
             .update({ keycrm_buyer_id: syncResult.buyerId })
@@ -68,6 +75,6 @@ module.exports = async function handler(req, res) {
 
     return res.status(200).json({ processed: results.length, results });
   } catch (e) {
-    return res.status(500).json({ error: 'Помилка cron-синхронізації', details: String(e.message || e) });
+    return res.status(500).json({ error: 'Помилка крон-синхронізації', details: String(e.message || e) });
   }
 };
