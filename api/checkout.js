@@ -1,90 +1,150 @@
+// Оформлення замовлення: спочатку ЗАВЖДИ пишемо в Supabase (джерело правди),
+// і лише потім намагаємось синхронізувати з KeyCRM. Якщо KeyCRM недоступний —
+// замовлення клієнта все одно збережено, помилка синхронізації логується для cron-повтору.
+const { getSupabase } = require('../lib/supabase');
+const { getSessionUser } = require('../lib/session');
+const { syncOrderToKeyCRM } = require('../lib/keycrm');
+
+// Розбирає id елемента кошика виду "<productId>_<weight>"
+function parseCartItemId(id) {
+  const s = String(id || '');
+  const idx = s.lastIndexOf('_');
+  if (idx === -1) return { productId: s, weight: null };
+  return { productId: s.slice(0, idx), weight: s.slice(idx + 1) };
+}
+
 module.exports = async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Метод не дозволено' });
 
   const {
     firstName, lastName, phone, email,
-    petName, deliveryMethod, deliveryAddress,
-    cityName, branchRef, street, house, apartment,
-    comment, callBeforeDelivery, payMethod, items
+    petName, deliveryType, deliveryMethod,
+    cityName, deliveryAddress, cityRef, branchRef, branchName,
+    street, house, apartment,
+    comment, callBeforeDelivery, payMethod, items,
   } = req.body || {};
 
   if (!phone || !items?.length) {
-    return res.status(400).json({ error: 'phone and items are required' });
+    return res.status(400).json({ error: 'phone та items обов’язкові' });
   }
 
-  const headers = {
-    Authorization: `Bearer ${process.env.KEYCRM_API_KEY}`,
-    'Content-Type': 'application/json',
+  const totalAmount = items.reduce((sum, item) => sum + (item.price || 0) * (item.qty || 1), 0);
+
+  const contactSnapshot = { firstName, lastName, phone, email, petName };
+  const deliverySnapshot = {
+    deliveryType, deliveryMethod, cityName, cityRef, branchRef, branchName,
+    street, house, apartment, deliveryAddress, callBeforeDelivery,
   };
 
-  const fullName = [firstName, lastName].filter(Boolean).join(' ') || 'Замовлення з сайту';
+  const supabase = getSupabase();
 
-  try {
-    // 1. Create buyer (кличка → структурне поле CT_1001, не в текст)
-    const buyerPayload = {
-      full_name: fullName,
-      phone: [phone],
-    };
-    if (email) buyerPayload.email = [email];
-    if (petName) buyerPayload.custom_fields = [{ uuid: 'CT_1001', value: petName }];
-
-    const buyerRes = await fetch('https://openapi.keycrm.app/v1/buyer', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(buyerPayload),
-    });
-    const buyer = await buyerRes.json();
-    if (!buyerRes.ok) return res.status(502).json({ error: 'KeyCRM buyer error', details: buyer });
-
-    // 2. Comment лишається тільки для оплати й довільного коментаря клієнта
-    const commentParts = [];
-    if (payMethod) commentParts.push(`Оплата: ${payMethod === 'cod' ? 'Накладений платіж' : payMethod === 'applegoogle' ? 'Apple/Google Pay' : 'Картка онлайн'}`);
-    if (callBeforeDelivery) commentParts.push('Подзвонити перед відправкою: так');
-    if (comment) commentParts.push(`Коментар: ${comment}`);
-    const buyerComment = commentParts.join('\n');
-
-    // 3. Build products array
-    const products = items.map(item => ({
-      name: `${item.name} ${item.weight}г`,
-      quantity: item.qty || 1,
-      price: item.price || 0,
-      unit_type: 'шт',
-    }));
-
-    // 4. Shipping — структуроване поле замість тексту. Завжди Нова Пошта (Укрпошту прибрано).
-    const shipping = { shipping_service: 'Нова Пошта' };
-    if (cityName) shipping.shipping_address_city = cityName;
-    if (fullName) shipping.recipient_full_name = fullName;
-    if (phone) shipping.recipient_phone = phone;
-
-    if (deliveryMethod === 'courier') {
-      const line2 = [street, house].filter(Boolean).join(', ') + (apartment ? `, кв./оф. ${apartment}` : '');
-      if (line2) shipping.shipping_secondary_line = line2;
-    } else {
-      // branch / postomat — branchRef це реальний Nova Poshta warehouse Ref, який форма вже рахує
-      if (branchRef) shipping.warehouse_ref = branchRef;
-      if (deliveryAddress) shipping.shipping_receive_point = deliveryAddress;
-    }
-
-    // 5. Create order
-    const orderPayload = {
-      source_name: 'Сайт',
-      buyer: { id: buyer.id },
-      buyer_comment: buyerComment,
-      products,
-      shipping,
-    };
-
-    const orderRes = await fetch('https://openapi.keycrm.app/v1/order', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(orderPayload),
-    });
-    const order = await orderRes.json();
-    if (!orderRes.ok) return res.status(502).json({ error: 'KeyCRM order error', details: order });
-
-    return res.status(200).json({ buyer, order });
-  } catch (e) {
-    return res.status(500).json({ error: String(e) });
+  // Якщо користувач залогінений — знаходимо його запис (для user_id і вже відомого keycrm_buyer_id)
+  const session = await getSessionUser(req);
+  let dbUser = null;
+  if (session) {
+    const { data } = await supabase.from('users').select('*').eq('id', session.userId).maybeSingle();
+    dbUser = data || null;
   }
-}
+
+  // КРОК 1: пишемо замовлення в Supabase. Якщо це не вдалося — переривyємо чекаут з помилкою.
+  let order;
+  try {
+    const { data: insertedOrder, error: orderErr } = await supabase
+      .from('orders')
+      .insert({
+        user_id: dbUser ? dbUser.id : null,
+        status: 'new',
+        total_amount: totalAmount,
+        currency: 'UAH',
+        pay_method: payMethod,
+        comment: comment || null,
+        contact_snapshot: contactSnapshot,
+        delivery_snapshot: deliverySnapshot,
+        keycrm_sync_status: 'pending',
+        keycrm_sync_attempts: 0,
+      })
+      .select()
+      .single();
+    if (orderErr) throw orderErr;
+    order = insertedOrder;
+
+    const orderItemsPayload = items.map((item) => {
+      const parsed = parseCartItemId(item.id);
+      return {
+        order_id: order.id,
+        product_id: parsed.productId,
+        name: item.name,
+        weight: item.weight != null ? String(item.weight) : parsed.weight,
+        qty: item.qty || 1,
+        price: item.price || 0,
+        img: item.img || null,
+      };
+    });
+
+    const { error: itemsErr } = await supabase.from('order_items').insert(orderItemsPayload);
+    if (itemsErr) throw itemsErr;
+
+    // Оновлюємо/створюємо профіль чекауту користувача — для автозаповнення наступного разу.
+    if (dbUser) {
+      await supabase.from('user_checkout_profile').upsert(
+        {
+          user_id: dbUser.id,
+          first_name: firstName || null,
+          last_name: lastName || null,
+          phone: phone || null,
+          email: email || null,
+          pet_name: petName || null,
+          delivery_method: deliveryMethod || null,
+          city_name: cityName || null,
+          city_ref: cityRef || null,
+          branch_ref: branchRef || null,
+          branch_name: branchName || null,
+          street: street || null,
+          house: house || null,
+          apartment: apartment || null,
+          pay_method: payMethod || null,
+          call_before_delivery: !!callBeforeDelivery,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id' }
+      );
+    }
+  } catch (e) {
+    return res.status(500).json({ error: 'Не вдалося зберегти замовлення', details: String(e.message || e) });
+  }
+
+  // КРОК 2: намагаємось синхронізувати з KeyCRM. Помилка тут НЕ повинна ламати чекаут клієнта.
+  try {
+    const orderItemsForSync = items.map((item) => ({ name: item.name, weight: item.weight, qty: item.qty, price: item.price }));
+    const existingBuyerId = dbUser ? dbUser.keycrm_buyer_id : null;
+
+    const syncResult = await syncOrderToKeyCRM(order, orderItemsForSync, existingBuyerId);
+
+    await supabase
+      .from('orders')
+      .update({
+        keycrm_buyer_id: syncResult.buyerId,
+        keycrm_order_id: syncResult.keycrmOrderId,
+        keycrm_sync_status: 'synced',
+        keycrm_sync_error: null,
+      })
+      .eq('id', order.id);
+
+    // Виправлення бага "дублікатів лідів": запам'ятовуємо buyer_id за користувачем назавжди.
+    if (dbUser && !syncResult.buyerReused) {
+      await supabase.from('users').update({ keycrm_buyer_id: syncResult.buyerId }).eq('id', dbUser.id);
+    }
+  } catch (syncErr) {
+    await supabase
+      .from('orders')
+      .update({
+        keycrm_sync_status: 'failed',
+        keycrm_sync_error: String(syncErr.message || syncErr),
+        keycrm_sync_attempts: 1,
+      })
+      .eq('id', order.id);
+    // Клієнту все одно відповідаємо успіхом — cron повторить синхронізацію пізніше.
+  }
+
+  return res.status(200).json({ orderId: order.id });
+};

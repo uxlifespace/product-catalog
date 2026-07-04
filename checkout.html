@@ -714,6 +714,7 @@ async function submitOrder() {
     var apt = document.getElementById('npApt').value.trim();
     deliveryAddress = 'Нова Пошта, кур\'єр: ' + cityName + ', ' + street + ', ' + house + (apt ? ', кв./оф. ' + apt : '');
   }
+var branchName = npMethod === 'branch' ? (selectedBranch ? selectedBranch.name : document.getElementById('npBranch').value.trim()) : npMethod === 'postomat' ? (selectedBranch ? selectedBranch.name : document.getElementById('npPostomat').value.trim()) : null;
 
   var payload = {
     firstName: document.getElementById('firstName').value.trim(),
@@ -733,11 +734,12 @@ async function submitOrder() {
     comment: document.getElementById('comment').value.trim(),
     callBeforeDelivery: document.getElementById('callBeforeDelivery').checked,
     payMethod: payMethod,
-    items: cartItems
+    items: cartItems,
+    branchName: branchName
   };
 
   try {
-    var orderRes = await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    var orderRes = await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify(payload)});
     var orderData = await orderRes.json();
     if (!orderRes.ok) throw new Error(orderData.error||'Помилка створення замовлення');
 
@@ -762,6 +764,74 @@ function showSuccess(name) {
 }
 
 loadCart();
+
+// Автозаповнення для залогінених користувачів: підтягуємо контактні дані
+// та останню адресу доставки з профілю, якщо поля ще порожні (нічого не перезаписуємо).
+(function prefillFromProfile() {
+  fetch('/api/me', { credentials: 'same-origin' })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (!d || !d.user) return;
+      var p = d.profile || {};
+
+      var firstNameEl = document.getElementById('firstName');
+      if (firstNameEl && !firstNameEl.value && d.user.name) {
+        var parts = d.user.name.split(' ');
+        firstNameEl.value = parts[0] || '';
+        var lastNameEl = document.getElementById('lastName');
+        if (lastNameEl && !lastNameEl.value) lastNameEl.value = parts.slice(1).join(' ') || '';
+      }
+
+      var phoneEl = document.getElementById('phone');
+      if (phoneEl && p.phone && (!phoneEl.value || phoneEl.value === '+380')) phoneEl.value = p.phone;
+
+      var emailEl = document.getElementById('email');
+      if (emailEl && !emailEl.value) emailEl.value = p.email || d.user.email || '';
+
+      var petNameEl = document.getElementById('petName');
+      if (petNameEl && !petNameEl.value && p.pet_name) petNameEl.value = p.pet_name;
+
+      var callBeforeEl = document.getElementById('callBeforeDelivery');
+      if (callBeforeEl && typeof p.call_before_delivery === 'boolean') callBeforeEl.checked = p.call_before_delivery;
+
+      if (p.pay_method) {
+        var payRadio = document.querySelector('input[name=payment][value="' + p.pay_method + '"]');
+        if (payRadio) payRadio.checked = true;
+      }
+
+      if (p.delivery_method) {
+        var tabBtn = document.querySelector('#npMethodTabs .dtab[onclick*="\'' + p.delivery_method + '\'"]');
+        if (tabBtn) setNpMethod(p.delivery_method, tabBtn);
+      }
+
+      if (p.city_name) {
+        selectedCity = p.city_ref ? { ref: p.city_ref, name: p.city_name, full: p.city_name } : null;
+        var cityInput = document.getElementById('npCity');
+        if (cityInput && !cityInput.value) cityInput.value = p.city_name;
+      }
+
+      if (p.branch_ref && p.branch_name) {
+        selectedBranch = { ref: p.branch_ref, name: p.branch_name };
+        if (p.delivery_method === 'branch') {
+          var branchInput = document.getElementById('npBranch');
+          if (branchInput && !branchInput.value) branchInput.value = p.branch_name;
+        } else if (p.delivery_method === 'postomat') {
+          var postomatInput = document.getElementById('npPostomat');
+          if (postomatInput && !postomatInput.value) postomatInput.value = p.branch_name;
+        }
+      }
+
+      if (p.delivery_method === 'courier') {
+        var streetEl = document.getElementById('npStreet');
+        if (streetEl && !streetEl.value && p.street) streetEl.value = p.street;
+        var houseEl = document.getElementById('npHouse');
+        if (houseEl && !houseEl.value && p.house) houseEl.value = p.house;
+        var aptEl = document.getElementById('npApt');
+        if (aptEl && !aptEl.value && p.apartment) aptEl.value = p.apartment;
+      }
+    })
+    .catch(function () { /* гість або мережева помилка — просто не автозаповнюємо */ });
+})();
 </script>
 </body>
 </html>

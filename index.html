@@ -207,6 +207,10 @@ html,body{overflow-x:hidden}
     <img src="Vector-logo.svg" alt="Marcel&amp;Co">
   </a>
   
+  <a class="acc-link" href="account.html" id="accLink" aria-label="Мій кабінет" style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-family:var(--body);font-weight:500;font-size:15px;color:var(--main)">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    <span id="accLinkLabel">Кабінет</span>
+  </a>
   <button class="cart-open" id="openCart" type="button" aria-haspopup="dialog" aria-label="Відкрити кошик"><span class="badge" id="cartCount">0</span>Кошик</button>
 </div></header>
 
@@ -367,6 +371,20 @@ atabs();grid();rc();
       window.location.href='/checkout.html';
     },true);
   });
+})();
+</script>
+<script>
+// Показуємо ім'я користувача в шапці замість "Кабінет", якщо він залогінений.
+(function () {
+  fetch('/api/me', { credentials: 'same-origin' })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (d && d.user && d.user.name) {
+        var label = document.getElementById('accLinkLabel');
+        if (label) label.textContent = d.user.name.split(' ')[0];
+      }
+    })
+    .catch(function () { /* гість — залишаємо "Кабінет" */ });
 })();
 </script>
 </body>
