@@ -743,7 +743,16 @@ var branchName = npMethod === 'branch' ? (selectedBranch ? selectedBranch.name :
     var orderData = await orderRes.json();
     if (!orderRes.ok) throw new Error(orderData.error||'Помилка створення замовлення');
 
-    sessionStorage.removeItem('marcelCart');
+if (payMethod !== 'cod') {
+        var payRes = await fetch('/api/payment',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({orderId:orderData.orderId, items:cartItems})});
+        var payData = await payRes.json();
+        if (!payRes.ok || !payData.pageUrl) throw new Error(payData.error||'Помилка створення оплати');
+        sessionStorage.removeItem('marcelCart');
+        window.location.href = payData.pageUrl;
+        return;
+      }
+
+          sessionStorage.removeItem('marcelCart');
     showSuccess(payload.firstName);
   } catch(e) {
     btn.classList.remove('loading'); btn.disabled = false;
@@ -764,6 +773,7 @@ function showSuccess(name) {
 }
 
 loadCart();
+if (new URLSearchParams(location.search).get('success')) { showSuccess(''); }
 
 // Автозаповнення для залогінених користувачів: підтягуємо контактні дані
 // та останню адресу доставки з профілю, якщо поля ще порожні (нічого не перезаписуємо).
