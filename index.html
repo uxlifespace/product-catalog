@@ -2,6 +2,7 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Marcel&amp;Co — Каталог ласощів</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -32,6 +33,9 @@ img{display:block;max-width:100%}button{font-family:inherit;cursor:pointer}a{col
 .cart-open{justify-self:end;display:inline-flex;align-items:center;gap:7px;background:none;border:none;font-family:var(--body);font-weight:500;font-size:24px;letter-spacing:-.48px;color:var(--main)}
 .cart-open .badge{display:grid;place-items:center;width:26px;height:26px;border-radius:100px;background:var(--main2);color:var(--main);font-size:16px;font-weight:500}
 .cart-open:hover{color:var(--hover)}
+.hdr__actions{display:flex;align-items:center;gap:50px}
+.cabinet-open{display:inline-flex;align-items:center;gap:7px;font-family:var(--body);font-weight:500;font-size:24px;letter-spacing:-.48px;color:var(--main);text-decoration:none}
+.cabinet-open:hover{color:var(--hover)}
 /* HERO */
 .hero{padding-top:48px;padding-bottom:28px}
 .hero h1{margin:0;font-family:var(--body);font-weight:400;font-size:80px;line-height:1.0;color:var(--main)}
@@ -163,6 +167,8 @@ img{display:block;max-width:100%}button{font-family:inherit;cursor:pointer}a{col
 /* FOOTER */
 .ftr{padding:32px 0 40px;margin-top:34px}
 .ftr__in{display:flex;align-items:center;justify-content:space-between}
+.flegal{display:flex;gap:20px;justify-content:center;margin-top:18px;font-size:13px;opacity:.65}
+.flegal a{text-decoration:underline}
 .fsoc{display:flex;gap:26px}
 .fsoc a{display:inline-flex;align-items:center;gap:8px;color:var(--main);font-size:15px;font-weight:500}
 .fsoc a img{width:24px;height:24px}.fsoc a:hover{color:var(--hover)}
@@ -207,7 +213,10 @@ html,body{overflow-x:hidden}
     <img src="Vector-logo.svg" alt="Marcel&amp;Co">
   </a>
   
-  <button class="cart-open" id="openCart" type="button" aria-haspopup="dialog" aria-label="Відкрити кошик"><span class="badge" id="cartCount">0</span>Кошик</button>
+  <div class="hdr__actions">
+    <button class="cart-open" id="openCart" type="button" aria-haspopup="dialog" aria-label="Відкрити кошик"><span class="badge" id="cartCount">0</span>Кошик</button>
+    <a class="cabinet-open" href="/account.html" aria-label="Особистий кабінет"><span class="badge"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="7" cy="4.2" r="2.7" fill="currentColor"/><path d="M1.5 13c0-3.04 2.46-5.5 5.5-5.5s5.5 2.46 5.5 5.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span>Кабінет</a>
+  </div>
 </div></header>
 
 <section class="wrap hero"><h1>Каталог ласощів</h1><p>Завжди один інгредієнт у складі. Без добавок, консервантів та ароматизаторів.</p></section>
@@ -276,8 +285,10 @@ html,body{overflow-x:hidden}
 
 <footer class="ftr"><div class="wrap ftr__in">
   <a class="logo" href="#" aria-label="Marcel&amp;Co"><img src="Vector-logo.svg" alt="Marcel&amp;Co"></a>
-  <div class="fsoc"><a href="#"><img src="social-icons.svg" alt="">Написати</a><a href="#"><img src="social-icons-1.svg" alt="">Спостерігати</a></div>
-</div></footer>
+  <div class="fsoc"><a href="https://t.me/marcelcobot" target="_blank" rel="noopener"><img src="social-icons.svg" alt="Telegram">Написати</a><a href="https://www.instagram.com/marcelco.com.ua/" target="_blank" rel="noopener"><img src="social-icons-1.svg" alt="Instagram">Спостерігати</a></div>
+</div>
+<div class="wrap flegal"><a href="/oferta.html">Публічна оферта</a><a href="/privacy.html">Політика конфіденційності</a></div>
+</footer>
 
 <script>
 const WEIGHTS=[{w:100,g:"100 гр"},{w:500,g:"500 гр"},{w:1000,g:"1000 гр"}];const PRICES={1:[197,783,1533],2:[130,445,856],3:[147,534,1034],4:[177,680,1326],5:[165,623,1212],6:[149,541,1048],7:[206,827,1621],8:[199,792,1549],9:[168,637,1241],10:[168,636,1238],11:[174,667,1300],12:[288,1236,2438],13:[146,526,1017],14:[162,608,1181],15:[201,804,1573],16:[170,646,1257]};const WI={100:0,500:1,1000:2};

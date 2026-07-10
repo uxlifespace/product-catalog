@@ -2,6 +2,7 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Marcel&amp;Co — Оформлення замовлення</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -33,7 +34,7 @@ img{display:block;max-width:100%}button{font-family:inherit;cursor:pointer}a{col
 .hdr__spacer{justify-self:end}
 
 /* PAGE TITLE */
-.page-title{font-family:var(--disp);font-size:40px;font-weight:400;color:var(--green);margin:40px 0 32px;letter-spacing:-.5px;line-height:1.1}
+.page-title{font-family:var(--disp);font-size:40px;font-weight:400;color:var(--main);margin:40px 0 32px;letter-spacing:-.5px;line-height:1.1}
 
 /* LAYOUT */
 .co{display:grid;grid-template-columns:1fr 420px;gap:40px;padding-bottom:80px;align-items:start}
@@ -94,6 +95,17 @@ img{display:block;max-width:100%}button{font-family:inherit;cursor:pointer}a{col
 .pay-name{font-size:14px;font-weight:600;color:var(--green)}
 .pay-desc{font-size:12px;color:var(--green);opacity:.5;margin-top:2px}
 .pay-logos{display:flex;gap:5px;align-items:center;flex-shrink:0}
+
+/* CALL-BEFORE-DELIVERY TOGGLE */
+.call-toggle{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:14px}
+.call-toggle__label{font-size:14px;font-weight:600;color:var(--green)}
+.call-toggle__sub{font-size:12px;color:var(--green);opacity:.5;margin-top:2px}
+.switch{position:relative;display:inline-block;width:44px;height:26px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.switch__track{position:absolute;cursor:pointer;inset:0;background:rgba(63,72,24,.2);border-radius:999px;transition:background .2s}
+.switch__track:before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.switch input:checked + .switch__track{background:var(--main)}
+.switch input:checked + .switch__track:before{transform:translateX(18px)}
 
 /* SIDEBAR */
 .sidebar{position:sticky;top:100px}
@@ -215,7 +227,10 @@ img{display:block;max-width:100%}button{font-family:inherit;cursor:pointer}a{col
             <div class="row2">
               <div class="field">
                 <label for="npStreet">Вулиця</label>
-                <input type="text" id="npStreet" placeholder="Вулиця" autocomplete="off" />
+                <div class="ac-wrap">
+                  <input type="text" id="npStreet" placeholder="Введіть назву вулиці..." autocomplete="off" />
+                  <div class="ac-list" id="npStreetList"></div>
+                </div>
                 <span id="npStreetErr" style="font-size:12px;color:#c0392b;display:none">Вкажіть вулицю</span>
               </div>
               <div class="field">
@@ -249,7 +264,7 @@ img{display:block;max-width:100%}button{font-family:inherit;cursor:pointer}a{col
         </div>
         <div class="field">
           <label for="phone">Номер телефону</label>
-          <input type="tel" id="phone" placeholder="+380XXXXXXXXX" autocomplete="tel" />
+          <input type="tel" id="phone" placeholder="+380XXXXXXXXX" autocomplete="tel" value="+380" maxlength="13" inputmode="numeric" />
           <span class="err-msg">Вкажіть коректний номер</span>
         </div>
         <div class="field">
@@ -290,7 +305,7 @@ img{display:block;max-width:100%}button{font-family:inherit;cursor:pointer}a{col
             <div class="pay-radio"></div>
             <div class="pay-info">
               <div class="pay-name">Картка онлайн</div>
-              <div class="pay-desc">Visa / Mastercard — безпечна оплата через Monobank</div>
+              <div class="pay-desc">Visa / Mastercard — захищена оплата через Monobank</div>
             </div>
             <div class="pay-logos">
               <!-- Visa real logo -->
@@ -329,6 +344,16 @@ img{display:block;max-width:100%}button{font-family:inherit;cursor:pointer}a{col
         <div class="field">
           <textarea id="comment" placeholder="Уточнення до замовлення, побажання щодо часу відправки або упаковки..."></textarea>
         </div>
+        <div class="call-toggle">
+          <div>
+            <div class="call-toggle__label">Подзвонити перед відправкою</div>
+            <div class="call-toggle__sub">Зателефонуємо, щоб узгодити деталі перед відправкою замовлення</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="callBeforeDelivery" />
+            <span class="switch__track"></span>
+          </label>
+        </div>
       </div>
 
     </div><!-- /leftCol -->
@@ -356,7 +381,7 @@ img{display:block;max-width:100%}button{font-family:inherit;cursor:pointer}a{col
           <div class="btn-spinner"></div>
         </button>
         <p class="submit-error" id="submitError"></p>
-        <p class="legal">Натискаючи кнопку, ви погоджуєтесь з умовами продажу. Платіжні дані обробляються Monobank — ми їх не зберігаємо.</p>
+        <p class="legal">Натискаючи кнопку, ви погоджуєтесь з <a href="/oferta.html" target="_blank" rel="noopener">умовами продажу</a> та <a href="/privacy.html" target="_blank" rel="noopener">політикою конфіденційності</a>. Платіжні дані обробляються Monobank — ми їх не зберігаємо.</p>
       </div>
     </div>
 
@@ -414,10 +439,13 @@ function setNpMethod(method, el) {
   document.getElementById('npBranchWrap').style.display = 'none';
   document.getElementById('npPostomatWrap').style.display = 'none';
   document.getElementById('npCourierWrap').style.display = 'none';
-  // Re-reveal the relevant sub-field if a city is already chosen
+  // Re-reveal the relevant sub-field if a city is already chosen.
+  // The reveal + dropdown-open is deferred to the next tick because the tab
+  // button click also bubbles to the document-level "click outside .ac-wrap"
+  // handler below, which would otherwise close the list we just opened.
   if (selectedCity) {
-    if (method === 'branch') { document.getElementById('npBranchWrap').style.display = ''; npBranch(''); }
-    else if (method === 'postomat') { document.getElementById('npPostomatWrap').style.display = ''; npPostomat(''); }
+    if (method === 'branch') { document.getElementById('npBranchWrap').style.display = ''; setTimeout(function(){ npBranch(''); }, 0); }
+    else if (method === 'postomat') { document.getElementById('npPostomatWrap').style.display = ''; setTimeout(function(){ npPostomat(''); }, 0); }
     else if (method === 'courier') { document.getElementById('npCourierWrap').style.display = ''; }
   }
 }
@@ -443,6 +471,10 @@ document.getElementById('npBranch').addEventListener('input', function() {
   var val = this.value.trim();
   branchTimer = setTimeout(function(){ npBranch(val); }, 400);
 });
+document.getElementById('npBranch').addEventListener('focus', function() {
+  if (!selectedCity) return;
+  if (!document.getElementById('npBranchList').classList.contains('open')) npBranch(this.value.trim());
+});
 
 document.getElementById('npPostomat').addEventListener('input', function() {
   clearTimeout(branchTimer);
@@ -450,6 +482,31 @@ document.getElementById('npPostomat').addEventListener('input', function() {
   var val = this.value.trim();
   branchTimer = setTimeout(function(){ npPostomat(val); }, 400);
 });
+document.getElementById('npPostomat').addEventListener('focus', function() {
+  if (!selectedCity) return;
+  if (!document.getElementById('npPostomatList').classList.contains('open')) npPostomat(this.value.trim());
+});
+
+document.getElementById('npStreet').addEventListener('input', function() {
+  clearTimeout(branchTimer);
+  if (!selectedCity) return;
+  var val = this.value.trim();
+  if (val.length < 2) { closeAC('npStreetList'); return; }
+  branchTimer = setTimeout(function(){ npStreet(val); }, 400);
+});
+document.getElementById('npStreet').addEventListener('focus', function() {
+  if (!selectedCity) return;
+  var val = this.value.trim();
+  if (val.length >= 2 && !document.getElementById('npStreetList').classList.contains('open')) npStreet(val);
+});
+
+// NP descriptions frequently contain literal double quotes (e.g. Поштомат "Нова Пошта" №25874: ...).
+// Interpolating them unescaped into an HTML attribute breaks the tag and truncates the value at the
+// first embedded quote — that's what caused the input to show only "Поштомат" after selection.
+// Escape everything we inject into these autocomplete list items, both in attributes and text.
+function escAttr(s) {
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 
 async function npCity(q) {
   var list = document.getElementById('npCityList');
@@ -464,11 +521,11 @@ async function npCity(q) {
       var full = c.Present || c.MainDescription || c.Description || '';
       var short = c.MainDescription || c.Description || full;
       var rest = full.indexOf(short) === 0 ? full.slice(short.length).replace(/^,\s*/, '') : full;
-      return '<div class="ac-item" tabindex="0" data-ref="' + (c.DeliveryCity||c.Ref) + '" data-name="' + short + '" data-full="' + full + '"><strong>' + short + '</strong>' + (rest ? '<span style="opacity:.5;font-size:12px"> — ' + rest + '</span>' : '') + '</div>';
+      return '<div class="ac-item" tabindex="0" data-ref="' + escAttr(c.DeliveryCity||c.Ref) + '" data-settlement-ref="' + escAttr(c.Ref||'') + '" data-name="' + escAttr(short) + '" data-full="' + escAttr(full) + '"><strong>' + escAttr(short) + '</strong>' + (rest ? '<span style="opacity:.5;font-size:12px"> — ' + escAttr(rest) + '</span>' : '') + '</div>';
     }).join('');
     list.querySelectorAll('.ac-item').forEach(function(el) {
       el.addEventListener('click', function() {
-        selectedCity = {ref:el.dataset.ref, name:el.dataset.name, full:el.dataset.full};
+        selectedCity = {ref:el.dataset.ref, settlementRef:el.dataset.settlementRef, name:el.dataset.name, full:el.dataset.full};
         document.getElementById('npCity').value = el.dataset.full || el.dataset.name;
         closeAC('npCityList');
         if (npMethod === 'branch') { document.getElementById('npBranchWrap').style.display = ''; document.getElementById('npBranch').focus(); npBranch(''); }
@@ -482,16 +539,30 @@ async function npCity(q) {
 async function npBranch(q) { return npWarehouse(q, 'npBranchList', 'npBranch', 'Branch'); }
 async function npPostomat(q) { return npWarehouse(q, 'npPostomatList', 'npPostomat', 'Postomat'); }
 
+async function npWarehouseFetch(q, category) {
+  var r = await fetch('/api/novaposhta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'searchBranch',cityRef:selectedCity.ref,query:q,category:category})});
+  var d = await r.json();
+  return d.data || [];
+}
+
 async function npWarehouse(q, listId, inputId, category) {
   if (!selectedCity) return;
   var list = document.getElementById(listId);
+  var myToken = (list.dataset.reqToken = String(Date.now() + Math.random()));
   list.innerHTML = '<div class="ac-hint">Завантаження...</div>'; list.classList.add('open');
   try {
-    var r = await fetch('/api/novaposhta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'searchBranch',cityRef:selectedCity.ref,query:q,category:category})});
-    var d = await r.json();
-    var branches = d.data||[];
+    // NP's own API occasionally answers an otherwise-valid request with an empty page
+    // (their rate limiting, not ours) — retry a couple of times client-side, on top of
+    // the retries already happening server-side, before telling the user "not found".
+    var branches = [];
+    for (var attempt = 0; attempt < 3; attempt++) {
+      branches = await npWarehouseFetch(q, category);
+      if (list.dataset.reqToken !== myToken) return; // a newer request superseded this one
+      if (branches.length) break;
+      if (attempt < 2) await new Promise(function(res){ setTimeout(res, 500); });
+    }
     if (!branches.length) { list.innerHTML='<div class="ac-hint">Нічого не знайдено</div>'; return; }
-    list.innerHTML = branches.map(function(b){ return '<div class="ac-item" tabindex="0" data-ref="' + b.Ref + '" data-name="' + b.Description + '">' + b.Description + '</div>'; }).join('');
+    list.innerHTML = branches.map(function(b){ var d = escAttr(b.Description); return '<div class="ac-item" tabindex="0" data-ref="' + escAttr(b.Ref) + '" data-name="' + d + '">' + d + '</div>'; }).join('');
     list.querySelectorAll('.ac-item').forEach(function(el) {
       el.addEventListener('click', function() {
         selectedBranch = {ref:el.dataset.ref, name:el.dataset.name};
@@ -502,10 +573,76 @@ async function npWarehouse(q, listId, inputId, category) {
   } catch(e) { list.innerHTML='<div class="ac-hint">Помилка — введіть вручну</div>'; }
 }
 
+async function npStreet(q) {
+  if (!selectedCity) return;
+  var list = document.getElementById('npStreetList');
+  list.innerHTML = '<div class="ac-hint">Пошук...</div>'; list.classList.add('open');
+  try {
+    var r = await fetch('/api/novaposhta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'searchStreet',settlementRef:selectedCity.settlementRef,query:q})});
+    var d = await r.json();
+    var streets = d.data||[];
+    if (!streets.length) { list.innerHTML='<div class="ac-hint">Нічого не знайдено</div>'; return; }
+    list.innerHTML = streets.map(function(s){
+      var name = s.Present || s.SettlementStreetDescription || s.StreetsTypeDescription && (s.StreetsTypeDescription + ' ' + s.SettlementStreetDescription) || s.Description || '';
+      var n = escAttr(name);
+      return '<div class="ac-item" tabindex="0" data-name="' + n + '">' + n + '</div>';
+    }).join('');
+    list.querySelectorAll('.ac-item').forEach(function(el) {
+      el.addEventListener('click', function() {
+        document.getElementById('npStreet').value = el.dataset.name;
+        closeAC('npStreetList');
+        document.getElementById('npHouse').focus();
+      });
+    });
+  } catch(e) { list.innerHTML='<div class="ac-hint">Помилка — введіть вручну</div>'; }
+}
+
 function closeAC(id) { document.getElementById(id).classList.remove('open'); }
 document.addEventListener('click', function(e) {
   if (!e.target.closest('.ac-wrap')) document.querySelectorAll('.ac-list').forEach(function(l){ l.classList.remove('open'); });
 });
+
+// --- Phone mask: "+380" is a fixed, non-editable prefix; typing/pasting only
+// ever affects the 9 digits after it, and the caret can never move into the
+// prefix itself.
+(function() {
+  var PHONE_PREFIX = '+380';
+  var phoneEl = document.getElementById('phone');
+  if (!phoneEl) return;
+
+  function digitsAfterPrefix(raw) {
+    var digits = raw.replace(/\D/g, '');
+    if (digits.indexOf('380') === 0) digits = digits.slice(3);
+    else if (digits.indexOf('0') === 0) digits = digits.slice(1);
+    return digits.slice(0, 9);
+  }
+
+  function caretAfterPrefix() {
+    var pos = Math.max(phoneEl.value.length, PHONE_PREFIX.length);
+    phoneEl.setSelectionRange(pos, pos);
+  }
+
+  phoneEl.addEventListener('focus', function() {
+    if (!this.value) this.value = PHONE_PREFIX;
+    caretAfterPrefix();
+  });
+
+  phoneEl.addEventListener('click', function() {
+    if (this.selectionStart < PHONE_PREFIX.length) caretAfterPrefix();
+  });
+
+  phoneEl.addEventListener('keydown', function(e) {
+    var start = this.selectionStart, end = this.selectionEnd;
+    if ((e.key === 'Backspace' || e.key === 'Delete') && start <= PHONE_PREFIX.length && end <= PHONE_PREFIX.length) {
+      e.preventDefault();
+    }
+  });
+
+  phoneEl.addEventListener('input', function() {
+    this.value = PHONE_PREFIX + digitsAfterPrefix(this.value);
+    caretAfterPrefix();
+  });
+})();
 
 function selectPay(el) {
   document.querySelectorAll('.pay-method').forEach(function(p){ p.classList.remove('active'); });
@@ -595,6 +732,7 @@ async function submitOrder() {
     house: npMethod === 'courier' ? document.getElementById('npHouse').value.trim() : null,
     apartment: npMethod === 'courier' ? document.getElementById('npApt').value.trim() : null,
     comment: document.getElementById('comment').value.trim(),
+    callBeforeDelivery: document.getElementById('callBeforeDelivery').checked,
     payMethod: payMethod,
     items: cartItems
   };
@@ -604,8 +742,30 @@ async function submitOrder() {
     var orderData = await orderRes.json();
     if (!orderRes.ok) throw new Error(orderData.error||'Помилка створення замовлення');
 
-    sessionStorage.removeItem('marcelCart');
-    showSuccess(payload.firstName);
+    // Замовлення в KeyCRM створено. Накладений платіж — одразу показуємо успіх,
+    // онлайн-оплата карткою/Apple/Google Pay — переадресовуємо на оплату Monobank.
+    if (payMethod === 'cod') {
+      sessionStorage.removeItem('marcelCart');
+      showSuccess(payload.firstName);
+      return;
+    }
+
+    sessionStorage.setItem('marcelPendingName', payload.firstName || '');
+
+    var mbRes = await fetch('/api/monobank', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        orderId: orderData.order.id,
+        items: cartItems
+      })
+    });
+    var mbData = await mbRes.json();
+    if (!mbRes.ok) throw new Error(mbData.error || 'Не вдалося створити платіж Monobank');
+
+    // Monobank сам робить GET-редирект на вказаний нами redirectUrl після оплати —
+    // приховану форму будувати не потрібно, просто переходимо на сторінку оплати.
+    window.location.href = mbData.pageUrl;
   } catch(e) {
     btn.classList.remove('loading'); btn.disabled = false;
     var errEl = document.getElementById('submitError');
@@ -625,6 +785,18 @@ function showSuccess(name) {
 }
 
 loadCart();
+
+// Повернення з оплати Monobank — керується через query-параметр redirectUrl
+(function handlePaymentReturn() {
+  // Monobank сам не передає статус оплати в redirectUrl (лише факт повернення) —
+  // фактичне зарахування підтверджує webhook (api/monobank-webhook.js). Тут — лише UX.
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('success') === '1') {
+    sessionStorage.removeItem('marcelCart');
+    showSuccess(sessionStorage.getItem('marcelPendingName') || '');
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+})();
 </script>
 </body>
 </html>
